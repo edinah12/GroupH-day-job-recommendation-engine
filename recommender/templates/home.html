@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}
+Home
+{% endblock %}
+
+{% block content %}
+
+<section class="bg-light py-5">
+
+    <div class="container text-center">
+
+        <h1 class="display-4 fw-bold">
+            Find Your Dream Job
+        </h1>
+
+        <p class="lead">
+            Browse opportunities from top companies.
+        </p>
+
+        <a href="#" class="btn btn-primary btn-lg">
+            Browse Jobs
+        </a>
+
+    </div>
+
+</section>
+
+<div class="container my-5">
+
+    <h2 class="mb-4">
+        Latest Jobs
+    </h2>
+
+    <div class="row">
+
+        {% for job in jobs %}
+
+        <div class="col-md-6 col-lg-4 mb-4">
+
+            <div class="card shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <h5>{{ job.title }}</h5>
+
+                    <h6 class="text-muted">
+                        {{ job.company.name }}
+                    </h6>
+
+                    <p>
+                        <strong>Location:</strong>
+                        {{ job.location }}
+                    </p>
+
+                    <p>
+                        <strong>Salary:</strong>
+                        UGX {{ job.salary }}
+                    </p>
+
+                    <p>
+                        {{ job.description|truncatewords:20 }}
+                    </p>
+
+                </div>
+
+                <div class="card-footer bg-white">
+
+                    <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-primary w-100">
+                    
+                        View Details
+                    
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <p>No jobs available.</p>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

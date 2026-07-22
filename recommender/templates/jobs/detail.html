@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ job.title }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-5">
+
+    <div class="card shadow">
+
+        <div class="card-body">
+
+            <h2>{{ job.title }}</h2>
+
+            <h5 class="text-muted">
+                {{ job.company.name }}
+            </h5>
+
+            <hr>
+
+            <p><strong>Category:</strong> {{ job.category.name }}</p>
+
+            <p><strong>Location:</strong> {{ job.location }}</p>
+
+            <p><strong>Salary:</strong> UGX {{ job.salary }}</p>
+
+            <p><strong>Experience:</strong> {{ job.experience_required }} year(s)</p>
+
+            <p><strong>Job Type:</strong> {{ job.job_type }}</p>
+
+            <p><strong>Description</strong></p>
+
+            <p>{{ job.description }}</p>
+
+            <p><strong>Requirements</strong></p>
+
+            <p>{{ job.requirements }}</p>
+
+            <p><strong>Required Skills</strong></p>
+
+            <p>{{ job.required_skills }}</p>
+
+            <p><strong>Application Deadline:</strong> {{ job.deadline }}</p>
+
+            <a href="#" class="btn btn-success">
+                Apply Now
+            </a>
+
+            <a href="/" class="btn btn-secondary">
+                Back
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
