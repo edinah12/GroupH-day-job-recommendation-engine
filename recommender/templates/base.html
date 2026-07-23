@@ -59,7 +59,19 @@
                 </li>
             
                 {% if user.is_authenticated %}
-            
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'view_profile' %}">
+                        Profile
+                    </a>
+                </li>
+
+            <li class="nav-item">
+                <span class="nav-link disabled text-white-50 pb-0">
+                    {{ user.username }}
+                </span>
+            </li>
+
             <li class="nav-item">
                 <form action="{% url 'logout' %}" method="post" class="d-inline">
                     {% csrf_token %}
@@ -91,6 +103,17 @@
     </div>
 
 </nav>
+
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
 
 {% block content %}
 

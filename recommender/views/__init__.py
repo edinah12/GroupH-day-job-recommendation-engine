@@ -1,1 +1,1 @@
-from .profile import create_profile
+from .profile import create_profile, edit_profile, view_profile

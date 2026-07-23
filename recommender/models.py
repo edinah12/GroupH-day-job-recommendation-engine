@@ -47,6 +47,19 @@ class Profile(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def is_complete(self):
+        return bool(
+            self.skills.strip()
+            and (self.education.strip() or self.bio.strip())
+        )
+
+    def skills_list(self):
+        if not self.skills.strip():
+            return []
+        return [skill.strip() for skill in self.skills.split(",") if skill.strip()]
 
     def __str__(self):
         return self.user.username

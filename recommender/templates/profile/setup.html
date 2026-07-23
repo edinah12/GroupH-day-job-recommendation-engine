@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}
+Complete Profile
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5" style="max-width:760px;">
+
+    <div class="card shadow">
+        <div class="card-body p-4">
+            <h2 class="text-center mb-2">Complete your profile</h2>
+            <p class="text-muted text-center mb-4">
+                Add skills and background so the recommender can match you with relevant jobs.
+            </p>
+
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                {% include "profile/_form_fields.html" %}
+                <button type="submit" class="btn btn-primary w-100">Save and continue</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
