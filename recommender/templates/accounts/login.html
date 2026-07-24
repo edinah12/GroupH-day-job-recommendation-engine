@@ -1,63 +1,61 @@
 {% extends "base.html" %}
 
-{% block title %}
-Login
-{% endblock %}
+{% block title %}Login{% endblock %}
 
 {% block content %}
 
-<div class="container mt-5" style="max-width:520px;">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
 
-    <div class="card shadow">
-
-        <div class="card-body p-4">
-
-            <h2 class="text-center mb-2">
-                Login
-            </h2>
-            <p class="text-muted text-center mb-4">
-                Sign in to manage your profile and applications.
-            </p>
-
-            <form method="post" novalidate>
-
-                {% csrf_token %}
-
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        {{ form.non_field_errors }}
+            <div class="card card-auth p-4 p-sm-5">
+                <div class="text-center mb-4">
+                    <div class="icon-box bg-primary-subtle text-primary mb-3 mx-auto">
+                        <i class="bi bi-box-arrow-in-right fs-3"></i>
                     </div>
-                {% endif %}
+                    <h1 class="h3 fw-bold mb-1">Welcome Back</h1>
+                    <p class="text-muted small">Sign in to manage your profile and applications.</p>
+                </div>
 
-                {% for field in form %}
-                    <div class="mb-3">
-                        <label class="form-label" for="{{ field.id_for_label }}">
-                            {{ field.label }}
-                        </label>
-                        {{ field }}
-                        {% for error in field.errors %}
-                            <div class="invalid-feedback d-block">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                {% endfor %}
+                <form method="post" novalidate>
+                    {% csrf_token %}
 
-                <button type="submit" class="btn btn-primary w-100">
-                    Login
-                </button>
-            </form>
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger p-2 small mb-3">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
 
-            <p class="text-center mt-3 mb-1">
-                <a href="{% url 'password_reset' %}">Forgot your password?</a>
-            </p>
-            <p class="text-center mb-0">
-                New here?
-                <a href="{% url 'register' %}">Create an account</a>
-            </p>
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% for error in field.errors %}
+                                <div class="invalid-feedback d-block small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill mt-2 fw-semibold">
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="text-center mt-4 pt-3 border-top">
+                    <p class="small mb-2">
+                        <a href="{% url 'password_reset' %}" class="text-muted text-decoration-none">Forgot password?</a>
+                    </p>
+                    <p class="small text-muted mb-0">
+                        Don't have an account?
+                        <a href="{% url 'register' %}" class="fw-semibold text-primary text-decoration-none ms-1">Create one</a>
+                    </p>
+                </div>
+            </div>
 
         </div>
-
     </div>
-
 </div>
 
 {% endblock %}
