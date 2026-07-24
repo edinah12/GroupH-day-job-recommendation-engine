@@ -10,7 +10,8 @@
     <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
             <div class="d-flex align-items-center gap-3">
-                <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold fs-4 shadow-sm" style="width:52px; height:52px; min-width:52px;">
+                <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold fs-4 shadow-sm"
+                    style="width:52px; height:52px; min-width:52px;">
                     {{ user.username|slice:":1"|upper }}
                 </div>
                 <div>
@@ -25,7 +26,7 @@
 
             <div>
                 <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small">
-                    <i class="bi bi-briefcase text-primary me-1"></i> {{ jobs|length }} Position{% if jobs|length != 1 %}s{% endif %} Available
+                    <i class="bi bi-briefcase text-primary me-1"></i> {{ jobs|length }} Position{{ jobs|length|pluralize }} Available
                 </span>
             </div>
         </div>
@@ -38,54 +39,54 @@
 
     <div class="row g-4 mb-5">
         {% for job in jobs %}
-            <div class="col-md-6 col-lg-4">
-                <div class="card card-modern h-100">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="badge badge-custom badge-primary-soft">{{ job.job_type }}</span>
-                            <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ job.posted_at|date:"M d, Y" }}</small>
+        <div class="col-md-6 col-lg-4">
+            <div class="card card-modern h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge badge-custom badge-primary-soft">{{ job.job_type }}</span>
+                        <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ job.posted_at|date:"M d, Y" }}</small>
+                    </div>
+
+                    <h3 class="h5 fw-bold mb-1">{{ job.title }}</h3>
+                    <h6 class="text-muted mb-3 fw-normal">
+                        {{ job.company.name }}
+                    </h6>
+
+                    <div class="bg-light rounded-3 p-3 mb-3 small">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Location:</span>
+                            <span class="fw-medium">{{ job.location }}</span>
                         </div>
-
-                        <h3 class="h5 fw-bold mb-1">{{ job.title }}</h3>
-                        <h6 class="text-muted mb-3 fw-normal">
-                            {{ job.company.name }}
-                        </h6>
-
-                        <div class="bg-light rounded-3 p-3 mb-3 small">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="text-muted">Location:</span>
-                                <span class="fw-medium">{{ job.location }}</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-muted">Salary:</span>
-                                <span class="fw-semibold text-primary">UGX {{ job.salary }}</span>
-                            </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Salary:</span>
+                            <span class="fw-semibold text-primary">UGX {{ job.salary }}</span>
                         </div>
-
-                        <p class="card-text text-muted small mb-0">
-                            {{ job.description|truncatewords:20 }}
-                        </p>
                     </div>
 
-                    <div class="card-footer bg-white border-0 p-4 pt-0">
-                        <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-primary w-100 rounded-pill">
-                            View Details
-                        </a>
-                    </div>
-                </div>
-            </div>
-        {% empty %}
-            <div class="col-12">
-                <div class="card card-modern p-5 text-center">
-                    <div class="mb-3 text-muted">
-                        <i class="bi bi-inbox fs-1"></i>
-                    </div>
-                    <h5 class="fw-bold">No Jobs Available</h5>
-                    <p class="text-muted small mb-0">
-                        There are currently no active job postings. Check back soon!
+                    <p class="card-text text-muted small mb-0">
+                        {{ job.description|truncatewords:20 }}
                     </p>
                 </div>
+
+                <div class="card-footer bg-white border-0 p-4 pt-0">
+                    <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-primary w-100 rounded-pill">
+                        View Details
+                    </a>
+                </div>
             </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card card-modern p-5 text-center">
+                <div class="mb-3 text-muted">
+                    <i class="bi bi-inbox fs-1"></i>
+                </div>
+                <h5 class="fw-bold">No Jobs Available</h5>
+                <p class="text-muted small mb-0">
+                    There are currently no active job postings. Check back soon!
+                </p>
+            </div>
+        </div>
         {% endfor %}
     </div>
 </div>

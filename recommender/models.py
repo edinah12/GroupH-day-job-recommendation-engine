@@ -2,7 +2,23 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Profile(models.Model):
+    ROLE_SEEKER = "seeker"
+    ROLE_RECRUITER = "recruiter"
+    ROLE_CHOICES = [
+        (ROLE_SEEKER, "Job Seeker"),
+        (ROLE_RECRUITER, "Recruiter"),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default=ROLE_SEEKER,
+    )
+
+    company_name = models.CharField(max_length=200, blank=True)
+    designation = models.CharField(max_length=100, blank=True, help_text="e.g. Hiring Manager, Technical Recruiter")
+    company_website = models.URLField(blank=True)
 
     phone = models.CharField(max_length=20, blank=True)
 
@@ -50,7 +66,17 @@ class Profile(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     @property
+    def is_recruiter(self):
+        return self.role == self.ROLE_RECRUITER
+
+    @property
+    def is_seeker(self):
+        return self.role == self.ROLE_SEEKER
+
+    @property
     def is_complete(self):
+        if self.is_recruiter:
+            return bool(self.company_name.strip())
         return bool(
             self.skills.strip()
             and (self.education.strip() or self.bio.strip())
@@ -62,7 +88,7 @@ class Profile(models.Model):
         return [skill.strip() for skill in self.skills.split(",") if skill.strip()]
 
     def __str__(self):
-        return self.user.username
+        return f"{self.user.username} ({self.get_role_display()})"
     
 class JobCategory(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -95,10 +121,18 @@ class Job(models.Model):
     title = models.CharField(max_length=200)
 
     company = models.ForeignKey(
-    Company,
-    on_delete=models.CASCADE,
-    related_name="jobs"
-   )
+        Company,
+        on_delete=models.CASCADE,
+        related_name="jobs"
+    )
+
+    posted_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="posted_jobs",
+        null=True,
+        blank=True,
+    )
 
     category = models.ForeignKey(
         JobCategory,
@@ -166,6 +200,8 @@ class Application(models.Model):
         choices=STATUS_CHOICES,
         default="Pending"
     )
+
+    cover_letter = models.TextField(blank=True)
 
     applied_at = models.DateTimeField(auto_now_add=True)
 

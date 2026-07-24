@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">Job Seeker Dashboard</h1>
+            <p class="text-muted mb-0">Track your job applications and saved jobs.</p>
+        </div>
+        <a href="{% url 'home' %}" class="btn btn-outline-primary">
+            🔍 Browse All Jobs
+        </a>
+    </div>
+
+    <!-- Applications Table -->
+    <div class="card border-0 shadow-sm mb-5">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0 fw-bold">My Job Applications</h5>
+        </div>
+        <div class="card-body p-0">
+            {% if applications %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Job Title</th>
+                                <th>Company</th>
+                                <th>Type</th>
+                                <th>Applied Date</th>
+                                <th>Status</th>
+                                <th class="text-end pe-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app in applications %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <a href="{% url 'job_detail' app.job.id %}" class="fw-bold text-decoration-none text-dark">
+                                            {{ app.job.title }}
+                                        </a>
+                                    </td>
+                                    <td>{{ app.job.company.name }}</td>
+                                    <td><span class="badge bg-secondary">{{ app.job.job_type }}</span></td>
+                                    <td class="text-muted small">{{ app.applied_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if app.status == 'Accepted' %}
+                                            <span class="badge bg-success">Accepted</span>
+                                        {% elif app.status == 'Rejected' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                        {% elif app.status == 'Reviewed' %}
+                                            <span class="badge bg-info text-dark">Reviewed</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <a href="{% url 'job_detail' app.job.id %}" class="btn btn-sm btn-outline-primary">View Job</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <p class="text-muted mb-3">You haven't applied for any jobs yet.</p>
+                    <a href="{% url 'home' %}" class="btn btn-primary">
+                        Find Jobs Now
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

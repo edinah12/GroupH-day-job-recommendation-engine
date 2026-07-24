@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Your Job Listings - Recruiter Portal{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h1 class="h2 fw-bold mb-1">Your Job Listings</h1>
+            <p class="text-muted mb-0">View, edit, delete, and review applicants for your posted jobs.</p>
+        </div>
+        <a href="{% url 'create_job' %}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> Post New Job
+        </a>
+    </div>
+
+    <!-- Job Postings List Table -->
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-briefcase text-primary me-2"></i>Active Job Postings</h5>
+            <span class="badge bg-primary px-3 py-2 rounded-pill fs-6">{{ jobs|length }} Active Job{{ jobs|length|pluralize }}</span>
+        </div>
+        <div class="card-body p-0">
+            {% if jobs %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Job Title</th>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Location</th>
+                                <th>Applicants</th>
+                                <th>Posted Date</th>
+                                <th class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in jobs %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <a href="{% url 'job_detail' job.id %}" class="fw-bold text-decoration-none text-dark fs-6">
+                                            {{ job.title }}
+                                        </a>
+                                        <div class="small text-muted">{{ job.company.name }}</div>
+                                    </td>
+                                    <td><span class="badge bg-secondary-subtle text-secondary border rounded-pill">{{ job.category.name }}</span></td>
+                                    <td><span class="badge bg-info-subtle text-info border rounded-pill">{{ job.job_type }}</span></td>
+                                    <td><i class="bi bi-geo-alt me-1 text-muted"></i>{{ job.location }}</td>
+                                    <td>
+                                        <a href="{% url 'job_applicants' job.id %}" class="btn btn-sm btn-outline-primary rounded-pill fw-semibold">
+                                            👥 {{ job.applications.count }} Applicant{{ job.applications.count|pluralize }}
+                                        </a>
+                                    </td>
+                                    <td class="text-muted small">{{ job.posted_at|date:"M d, Y" }}</td>
+                                    <td class="text-end pe-4">
+                                        <a href="{% url 'job_detail' job.id %}" class="btn btn-sm btn-light border me-1 rounded-pill px-3" title="View Details">View</a>
+                                        <a href="{% url 'edit_job' job.id %}" class="btn btn-sm btn-warning me-1 rounded-pill px-3" title="Edit Job">Edit</a>
+                                        <a href="{% url 'delete_job' job.id %}" class="btn btn-sm btn-outline-danger rounded-pill px-3" title="Delete Job">Delete</a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox text-muted fs-1 d-block mb-3"></i>
+                    <h5 class="fw-bold mb-2">No Job Listings Posted</h5>
+                    <p class="text-muted mb-4">You haven't posted any job listings yet.</p>
+                    <a href="{% url 'create_job' %}" class="btn btn-primary rounded-pill px-4">
+                        Post Your First Job
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

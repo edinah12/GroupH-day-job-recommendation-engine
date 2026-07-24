@@ -13,6 +13,9 @@ class StyledAuthenticationForm(AuthenticationForm):
         self.fields["password"].widget.attrs["autocomplete"] = "current-password"
 
 
+from recommender.models import Profile
+
+
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(
         required=True,
@@ -20,10 +23,16 @@ class UserRegistrationForm(UserCreationForm):
             attrs={"placeholder": "name@example.com", "autocomplete": "email"}
         ),
     )
+    role = forms.ChoiceField(
+        choices=Profile.ROLE_CHOICES,
+        initial=Profile.ROLE_SEEKER,
+        widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
+        label="I am joining as a:",
+    )
 
     class Meta:
         model = User
-        fields = ("username", "email", "password1", "password2")
+        fields = ("username", "email", "role", "password1", "password2")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -40,7 +49,9 @@ class UserRegistrationForm(UserCreationForm):
         self.fields["password1"].help_text = "Must be at least 8 characters long."
         self.fields["password2"].help_text = ""
         
-        for field in self.fields.values():
+        for name, field in self.fields.items():
+            if isinstance(field.widget, (forms.RadioSelect, forms.CheckboxInput)):
+                continue
             css = field.widget.attrs.get("class", "")
             field.widget.attrs["class"] = f"{css} form-control".strip()
 
@@ -49,4 +60,8 @@ class UserRegistrationForm(UserCreationForm):
         user.email = self.cleaned_data["email"]
         if commit:
             user.save()
+            role = self.cleaned_data.get("role", Profile.ROLE_SEEKER)
+            profile, _ = Profile.objects.get_or_create(user=user)
+            profile.role = role
+            profile.save()
         return user

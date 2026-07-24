@@ -1,6 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db.models import Q
 from ..models import Job, Company, JobCategory
+from ..utils import get_user_profile
 
 
 def home(request):
@@ -30,6 +31,10 @@ def home(request):
                 "search_query": search_query,
             },
         )
+
+    profile = get_user_profile(request.user)
+    if profile.is_recruiter:
+        return redirect("recruiter_dashboard")
 
     jobs = Job.objects.select_related("company", "category").order_by("-posted_at")
     if search_query:
