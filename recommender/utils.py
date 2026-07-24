@@ -20,4 +20,6 @@ def post_login_url(user):
     profile = get_user_profile(user)
     if not profile.is_complete:
         return reverse("edit_profile")
+    if profile.is_recruiter:
+        return reverse("recruiter_dashboard")
     return reverse("home")

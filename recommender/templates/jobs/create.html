@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Post a New Job{% endblock %}
+
+{% block content %}
+<div class="container my-5" style="max-width: 760px;">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white py-3">
+            <h3 class="mb-0 fs-4">Post a New Job Opportunity</h3>
+        </div>
+        <div class="card-body p-4">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold" for="{{ form.title.id_for_label }}">Job Title</label>
+                        {{ form.title }}
+                        {% for error in form.title.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold" for="{{ form.job_type.id_for_label }}">Job Type</label>
+                        {{ form.job_type }}
+                        {% for error in form.job_type.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" for="{{ form.company_name.id_for_label }}">Company Name</label>
+                        {{ form.company_name }}
+                        {% for error in form.company_name.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" for="{{ form.category.id_for_label }}">Category</label>
+                        {{ form.category }}
+                        {% for error in form.category.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold" for="{{ form.location.id_for_label }}">Location</label>
+                        {{ form.location }}
+                        {% for error in form.location.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold" for="{{ form.salary.id_for_label }}">Salary (USD)</label>
+                        {{ form.salary }}
+                        {% for error in form.salary.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold" for="{{ form.experience_required.id_for_label }}">Exp Required (Yrs)</label>
+                        {{ form.experience_required }}
+                        {% for error in form.experience_required.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="{{ form.deadline.id_for_label }}">Application Deadline</label>
+                    {{ form.deadline }}
+                    {% for error in form.deadline.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="{{ form.required_skills.id_for_label }}">Required Skills</label>
+                    {{ form.required_skills }}
+                    <div class="form-text">Enter skills separated by commas (e.g. Python, Django, PostgreSQL)</div>
+                    {% for error in form.required_skills.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="{{ form.description.id_for_label }}">Job Description</label>
+                    {{ form.description }}
+                    {% for error in form.description.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold" for="{{ form.requirements.id_for_label }}">Requirements & Qualifications</label>
+                    {{ form.requirements }}
+                    {% for error in form.requirements.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'recruiter_dashboard' %}" class="btn btn-outline-secondary px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-5 fw-bold">Publish Job Listing</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

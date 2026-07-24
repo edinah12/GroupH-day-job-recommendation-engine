@@ -74,3 +74,40 @@ class ProfileForm(forms.ModelForm):
         picture = self.cleaned_data.get("profile_picture")
         _validate_file_extension(picture, ALLOWED_IMAGE_EXTENSIONS, "Profile picture")
         return picture
+
+
+class RecruiterProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = [
+            "company_name",
+            "designation",
+            "company_website",
+            "phone",
+            "bio",
+            "profile_picture",
+        ]
+        widgets = {
+            "company_name": forms.TextInput(attrs={"placeholder": "e.g. Acme Corp"}),
+            "designation": forms.TextInput(attrs={"placeholder": "e.g. Senior Tech Recruiter"}),
+            "company_website": forms.URLInput(attrs={"placeholder": "https://company.com"}),
+            "phone": forms.TextInput(attrs={"placeholder": "+1 555 0100"}),
+            "bio": forms.Textarea(
+                attrs={
+                    "rows": 4,
+                    "placeholder": "Describe your company or hiring scope",
+                }
+            ),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            existing = field.widget.attrs.get("class", "")
+            field.widget.attrs["class"] = f"{existing} form-control".strip()
+
+    def clean_profile_picture(self):
+        picture = self.cleaned_data.get("profile_picture")
+        _validate_file_extension(picture, ALLOWED_IMAGE_EXTENSIONS, "Profile picture")
+        return picture
+

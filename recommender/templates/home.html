@@ -1,91 +1,78 @@
 {% extends "base.html" %}
 
-{% block title %}
-Home
-{% endblock %}
+{% block title %}Home - Explore Opportunities{% endblock %}
 
 {% block content %}
 
-<section class="bg-light py-5">
-
-    <div class="container text-center">
-
-        <h1 class="display-4 fw-bold">
-            Find Your Dream Job
-        </h1>
-
-        <p class="lead">
-            Browse opportunities from top companies.
-        </p>
-
-        <a href="#" class="btn btn-primary btn-lg">
-            Browse Jobs
-        </a>
-
+<section class="bg-primary text-white py-5 mb-5 shadow-sm">
+    <div class="container text-center py-4">
+        <h1 class="display-4 fw-bold mb-3">Find Your Dream Job</h1>
+        <p class="lead mb-4 opacity-90">Discover personalized career opportunities posted by top recruiters.</p>
+        {% if user.is_authenticated and user.profile.is_recruiter %}
+            <a href="{% url 'create_job' %}" class="btn btn-light text-primary btn-lg fw-bold px-4 shadow">
+                + Post a New Job
+            </a>
+        {% else %}
+            <a href="#jobs-section" class="btn btn-light text-primary btn-lg fw-bold px-4 shadow">
+                Explore All Jobs
+            </a>
+        {% endif %}
     </div>
-
 </section>
 
-<div class="container my-5">
-
-    <h2 class="mb-4">
-        Latest Jobs
-    </h2>
-
-    <div class="row">
-
-        {% for job in jobs %}
-
-        <div class="col-md-6 col-lg-4 mb-4">
-
-            <div class="card shadow-sm h-100">
-
-                <div class="card-body">
-
-                    <h5>{{ job.title }}</h5>
-
-                    <h6 class="text-muted">
-                        {{ job.company.name }}
-                    </h6>
-
-                    <p>
-                        <strong>Location:</strong>
-                        {{ job.location }}
-                    </p>
-
-                    <p>
-                        <strong>Salary:</strong>
-                        UGX {{ job.salary }}
-                    </p>
-
-                    <p>
-                        {{ job.description|truncatewords:20 }}
-                    </p>
-
-                </div>
-
-                <div class="card-footer bg-white">
-
-                    <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-primary w-100">
-                    
-                        View Details
-                    
-                    </a>
-
-                </div>
-
-            </div>
-
+<div class="container my-5" id="jobs-section">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Latest Job Listings</h2>
+            <p class="text-muted mb-0">Browse open positions available for job seekers.</p>
         </div>
-
-        {% empty %}
-
-        <p>No jobs available.</p>
-
-        {% endfor %}
-
+        <span class="badge bg-secondary fs-6 px-3 py-2">{{ jobs|length }} Available</span>
     </div>
 
+    <div class="row g-4">
+        {% for job in jobs %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm h-100 position-relative">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-primary opacity-90">{{ job.job_type }}</span>
+                            <span class="badge bg-light text-dark border">{{ job.category.name }}</span>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-1">
+                            <a href="{% url 'job_detail' job.id %}" class="text-decoration-none text-dark stretched-link">
+                                {{ job.title }}
+                            </a>
+                        </h5>
+                        <h6 class="text-primary fw-semibold mb-3">{{ job.company.name }}</h6>
+
+                        <div class="small text-muted mb-3">
+                            <div class="mb-1">📍 {{ job.location }}</div>
+                            <div class="mb-1">💵 ${{ job.salary|floatformat:0 }} / yr</div>
+                            <div>⏱️ Exp: {{ job.experience_required }} yr(s)</div>
+                        </div>
+
+                        <p class="text-secondary small mb-0" style="display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            {{ job.description }}
+                        </p>
+                    </div>
+
+                    <div class="card-footer bg-white border-top-0 p-4 pt-0 d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Posted {{ job.posted_at|timesince }} ago</small>
+                        <a href="{% url 'job_detail' job.id %}" class="btn btn-sm btn-outline-primary fw-bold z-1 position-relative">
+                            View Job →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center py-5">
+                <p class="text-muted fs-5 mb-3">No job listings found at the moment.</p>
+                {% if user.is_authenticated and user.profile.is_recruiter %}
+                    <a href="{% url 'create_job' %}" class="btn btn-primary">Post the First Job</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
 </div>
 
 {% endblock %}

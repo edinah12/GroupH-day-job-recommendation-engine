@@ -31,10 +31,23 @@ Register
 
                 {% for field in form %}
                     <div class="mb-3">
-                        <label class="form-label" for="{{ field.id_for_label }}">
+                        <label class="form-label fw-semibold" for="{{ field.id_for_label }}">
                             {{ field.label }}
                         </label>
-                        {{ field }}
+                        {% if field.name == 'role' %}
+                            <div class="d-flex gap-4 p-2 border rounded bg-light">
+                                {% for radio in field %}
+                                    <div class="form-check">
+                                        {{ radio.tag }}
+                                        <label class="form-check-label fw-bold" for="{{ radio.id_for_label }}">
+                                            {{ radio.choice_label }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
                         {% if field.help_text %}
                             <div class="form-text">{{ field.help_text }}</div>
                         {% endif %}

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Job - {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="container my-5" style="max-width: 760px;">
+    <div class="card shadow border-0">
+        <div class="card-header bg-warning text-dark py-3 d-flex justify-content-between align-items-center">
+            <h3 class="mb-0 fs-4 fw-bold">Edit Job Listing</h3>
+            <a href="{% url 'job_detail' job.id %}" class="btn btn-sm btn-outline-dark">View Listing</a>
+        </div>
+        <div class="card-body p-4">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold" for="{{ form.title.id_for_label }}">Job Title</label>
+                        {{ form.title }}
+                        {% for error in form.title.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold" for="{{ form.job_type.id_for_label }}">Job Type</label>
+                        {{ form.job_type }}
+                        {% for error in form.job_type.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" for="{{ form.company_name.id_for_label }}">Company Name</label>
+                        {{ form.company_name }}
+                        {% for error in form.company_name.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold" for="{{ form.category.id_for_label }}">Category</label>
+                        {{ form.category }}
+                        {% for error in form.category.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold" for="{{ form.location.id_for_label }}">Location</label>
+                        {{ form.location }}
+                        {% for error in form.location.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold" for="{{ form.salary.id_for_label }}">Salary (USD)</label>
+                        {{ form.salary }}
+                        {% for error in form.salary.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold" for="{{ form.experience_required.id_for_label }}">Exp Required (Yrs)</label>
+                        {{ form.experience_required }}
+                        {% for error in form.experience_required.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="{{ form.deadline.id_for_label }}">Application Deadline</label>
+                    {{ form.deadline }}
+                    {% for error in form.deadline.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="{{ form.required_skills.id_for_label }}">Required Skills</label>
+                    {{ form.required_skills }}
+                    {% for error in form.required_skills.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="{{ form.description.id_for_label }}">Job Description</label>
+                    {{ form.description }}
+                    {% for error in form.description.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold" for="{{ form.requirements.id_for_label }}">Requirements & Qualifications</label>
+                    {{ form.requirements }}
+                    {% for error in form.requirements.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url 'delete_job' job.id %}" class="btn btn-outline-danger">Delete Job Listing</a>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'recruiter_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-warning px-4 fw-bold">Save Changes</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
