@@ -1,11 +1,55 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 
 from recommender.decorators import recruiter_required, seeker_required
-from recommender.forms import JobForm
+from recommender.forms import JobForm, JobApplicationForm
 from recommender.models import Job, Application, JobCategory
 from recommender.utils import get_user_profile
+
+
+def job_list(request):
+    search_query = request.GET.get("search", "").strip()
+    category_id = request.GET.get("category", "").strip()
+    job_type = request.GET.get("job_type", "").strip()
+    location_query = request.GET.get("location", "").strip()
+
+    jobs = Job.objects.select_related("company", "category").order_by("-posted_at")
+
+    if search_query:
+        jobs = jobs.filter(
+            Q(title__icontains=search_query) |
+            Q(company__name__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(required_skills__icontains=search_query)
+        )
+
+    if category_id and category_id.isdigit():
+        jobs = jobs.filter(category_id=int(category_id))
+
+    if job_type:
+        jobs = jobs.filter(job_type=job_type)
+
+    if location_query:
+        jobs = jobs.filter(location__icontains=location_query)
+
+    categories = JobCategory.objects.all()
+    job_types = [jt[0] for jt in Job.JOB_TYPES]
+
+    return render(
+        request,
+        "jobs/list.html",
+        {
+            "jobs": jobs,
+            "categories": categories,
+            "job_types": job_types,
+            "search_query": search_query,
+            "selected_category": category_id,
+            "selected_job_type": job_type,
+            "location_query": location_query,
+        },
+    )
 
 
 def job_detail(request, job_id):
@@ -98,14 +142,50 @@ def delete_job(request, job_id):
 @seeker_required
 def apply_job(request, job_id):
     job = get_object_or_404(Job, id=job_id)
+    profile = get_user_profile(request.user)
 
-    if Application.objects.filter(user=request.user, job=job).exists():
-        messages.info(request, "You have already applied for this job.")
+    existing_application = Application.objects.filter(user=request.user, job=job).first()
+    if existing_application:
+        messages.info(request, f"You have already submitted an application for '{job.title}'.")
+        return render(
+            request,
+            "jobs/apply.html",
+            {
+                "job": job,
+                "profile": profile,
+                "already_applied": True,
+                "application": existing_application,
+            },
+        )
+
+    if request.method == "POST":
+        form = JobApplicationForm(request.POST, request.FILES)
+        if form.is_valid():
+            application = form.save(commit=False)
+            application.user = request.user
+            application.job = job
+            application.save()
+
+            if request.FILES.get("resume"):
+                profile.resume = request.FILES["resume"]
+                profile.save()
+
+            messages.success(request, f"Your application for '{job.title}' has been submitted successfully!")
+            return redirect("job_detail", job_id=job.id)
     else:
-        Application.objects.create(user=request.user, job=job)
-        messages.success(request, f"Your application for '{job.title}' has been submitted successfully!")
+        form = JobApplicationForm()
 
-    return redirect("job_detail", job_id=job.id)
+    return render(
+        request,
+        "jobs/apply.html",
+        {
+            "job": job,
+            "profile": profile,
+            "form": form,
+            "already_applied": False,
+        },
+    )
+
 
 
 @recruiter_required

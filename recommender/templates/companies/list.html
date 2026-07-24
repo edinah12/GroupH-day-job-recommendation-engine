@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Companies - Job Recommendation Engine{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Companies Header Banner -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h1 class="h3 fw-bold mb-1">
+                    <i class="bi bi-building text-primary me-2"></i>Explore Companies
+                </h1>
+                <p class="text-muted small mb-0">
+                    Discover hiring companies, learn about their culture, and view active job openings.
+                </p>
+            </div>
+            <div>
+                <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small">
+                    <i class="bi bi-building-fill text-primary me-1"></i> {{ companies|length }} Compan{{ companies|length|pluralize:"y,ies" }} Listed
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-8">
+            <form method="get" action="{% url 'company_list' %}" class="bg-white p-2 rounded-4 shadow-sm border d-flex gap-2">
+                <div class="input-group align-items-center">
+                    <span class="bg-transparent border-0 text-muted ps-2" aria-hidden="true">
+                        <i class="bi bi-search fs-5"></i>
+                    </span>
+                    <input type="text" name="search" class="form-control border-0 bg-transparent ps-2 py-2" placeholder="Search companies by name, location, or industry..." value="{{ search_query|default:'' }}">
+                </div>
+                <button type="submit" class="btn btn-primary rounded-3 px-4 fw-semibold text-nowrap">
+                    Search
+                </button>
+            </form>
+            {% if search_query %}
+            <div class="text-center mt-2">
+                <a href="{% url 'company_list' %}" class="text-muted small text-decoration-underline">Clear search filter</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Companies Grid -->
+    <div class="row g-4 mb-5">
+        {% for company in companies %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card card-modern h-100 border-0 shadow-sm rounded-4">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        {% if company.logo %}
+                        <img src="{{ company.logo.url }}" alt="{{ company.name }} logo" class="rounded-3 object-fit-cover" style="width: 54px; height: 54px;">
+                        {% else %}
+                        <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center fw-bold fs-4" style="width: 54px; height: 54px; min-width: 54px;">
+                            {{ company.name|slice:":1"|upper }}
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h3 class="h5 fw-bold mb-1">{{ company.name }}</h3>
+                            <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ company.location }}</small>
+                        </div>
+                    </div>
+
+                    <p class="card-text text-muted small flex-grow-1 mb-3">
+                        {{ company.description|default:"No description available."|truncatewords:25 }}
+                    </p>
+
+                    <div class="d-flex align-items-center justify-content-between pt-3 border-top">
+                        <span class="badge bg-light text-primary border rounded-pill">
+                            <i class="bi bi-briefcase me-1"></i>{{ company.active_jobs_count }} Active Job{{ company.active_jobs_count|pluralize }}
+                        </span>
+                        <a href="{% url 'company_detail' company.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                            View Available Jobs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+                <div class="mb-3 text-muted">
+                    <i class="bi bi-building-exclamation fs-1"></i>
+                </div>
+                <h5 class="fw-bold">No Companies Found</h5>
+                <p class="text-muted small mb-0">
+                    No companies match your search criteria. Try a different search query!
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

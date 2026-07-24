@@ -4,109 +4,136 @@
 
 {% block content %}
 <div class="container my-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Recruiter Welcome Banner -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-            <h1 class="h2 mb-1">Recruiter Dashboard</h1>
-            <p class="text-muted mb-0">Manage your company job postings and review candidate applications.</p>
+            <h1 class="h2 fw-bold mb-1">Recruiter Dashboard</h1>
+            <p class="text-muted mb-0">Overview of your hiring stats, company profile, and applicant activity.</p>
         </div>
-        <a href="{% url 'create_job' %}" class="btn btn-primary btn-lg shadow-sm">
-            + Post New Job
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{% url 'recruiter_jobs' %}" class="btn btn-outline-primary rounded-pill px-4">
+                <i class="bi bi-briefcase me-1"></i> Manage Job Listings
+            </a>
+            <a href="{% url 'create_job' %}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> Post New Job
+            </a>
+        </div>
     </div>
 
     <!-- Quick Stats Cards -->
     <div class="row g-4 mb-5">
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm bg-primary text-white p-3">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-primary text-white p-3 rounded-4">
                 <div class="card-body text-center">
-                    <h6 class="text-uppercase tracking-wider opacity-75">Posted Jobs</h6>
+                    <h6 class="text-uppercase tracking-wider opacity-75 small">Total Jobs Posted</h6>
                     <h2 class="display-4 fw-bold mb-0">{{ total_jobs }}</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm bg-success text-white p-3">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-success text-white p-3 rounded-4">
                 <div class="card-body text-center">
-                    <h6 class="text-uppercase tracking-wider opacity-75">Total Applicants</h6>
+                    <h6 class="text-uppercase tracking-wider opacity-75 small">Total Applicants</h6>
                     <h2 class="display-4 fw-bold mb-0">{{ total_applications }}</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm bg-info text-white p-3">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-info text-white p-3 rounded-4">
                 <div class="card-body text-center">
-                    <h6 class="text-uppercase tracking-wider opacity-75">Company</h6>
+                    <h6 class="text-uppercase tracking-wider opacity-75 small">Company</h6>
                     <h4 class="fw-bold mb-0 mt-2 text-truncate">{{ user.profile.company_name|default:"Not specified" }}</h4>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 shadow-sm bg-secondary text-white p-3">
-                <div class="card-body text-center">
-                    <h6 class="text-uppercase tracking-wider opacity-75">Account Role</h6>
-                    <h4 class="fw-bold mb-0 mt-2">Recruiter</h4>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Job Postings List -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold text-dark">Your Job Listings</h5>
-            <span class="badge bg-primary px-3 py-2 fs-6">{{ jobs|length }} Active</span>
-        </div>
-        <div class="card-body p-0">
-            {% if jobs %}
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-4">Job Title</th>
-                                <th>Category</th>
-                                <th>Type</th>
-                                <th>Location</th>
-                                <th>Applicants</th>
-                                <th>Posted Date</th>
-                                <th class="text-end pe-4">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for job in jobs %}
-                                <tr>
-                                    <td class="ps-4">
-                                        <a href="{% url 'job_detail' job.id %}" class="fw-bold text-decoration-none text-dark fs-6">
-                                            {{ job.title }}
-                                        </a>
-                                        <div class="small text-muted">{{ job.company.name }}</div>
-                                    </td>
-                                    <td><span class="badge bg-secondary opacity-75">{{ job.category.name }}</span></td>
-                                    <td><span class="badge bg-info text-dark">{{ job.job_type }}</span></td>
-                                    <td>{{ job.location }}</td>
-                                    <td>
-                                        <a href="{% url 'job_applicants' job.id %}" class="btn btn-sm btn-outline-primary fw-semibold">
-                                            👥 {{ job.applications.count }} Applicants
-                                        </a>
-                                    </td>
-                                    <td class="text-muted small">{{ job.posted_at|date:"M d, Y" }}</td>
-                                    <td class="text-end pe-4">
-                                        <a href="{% url 'job_detail' job.id %}" class="btn btn-sm btn-light border me-1" title="View">View</a>
-                                        <a href="{% url 'edit_job' job.id %}" class="btn btn-sm btn-warning me-1" title="Edit">Edit</a>
-                                        <a href="{% url 'delete_job' job.id %}" class="btn btn-sm btn-outline-danger" title="Delete">Delete</a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+    <!-- Recent Applications Overview Section -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-clock-history text-primary me-2"></i>Recent Candidate Applications</h5>
+                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3">{{ recent_applications|length }} Recent</span>
                 </div>
-            {% else %}
-                <div class="text-center py-5">
-                    <p class="text-muted mb-3">You haven't posted any job listings yet.</p>
-                    <a href="{% url 'create_job' %}" class="btn btn-primary px-4">
-                        Post Your First Job
+                <div class="card-body p-0">
+                    {% if recent_applications %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Applicant</th>
+                                        <th>Job Applied For</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th class="text-end pe-4">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for app in recent_applications %}
+                                        <tr>
+                                            <td class="ps-4">
+                                                <div class="fw-semibold text-dark">{{ app.user.get_full_name|default:app.user.username }}</div>
+                                                <div class="small text-muted">{{ app.user.email }}</div>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'job_detail' app.job.id %}" class="text-decoration-none text-primary fw-medium">
+                                                    {{ app.job.title }}
+                                                </a>
+                                            </td>
+                                            <td>
+                                                {% if app.status == 'Accepted' %}
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">Accepted</span>
+                                                {% elif app.status == 'Rejected' %}
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill">Rejected</span>
+                                                {% elif app.status == 'Reviewed' %}
+                                                    <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill">Reviewed</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill">Pending</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-muted small">{{ app.applied_at|date:"M d, Y" }}</td>
+                                            <td class="text-end pe-4">
+                                                <a href="{% url 'job_applicants' app.job.id %}" class="btn btn-sm btn-outline-primary rounded-pill">
+                                                    Review
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox text-muted fs-1 d-block mb-2"></i>
+                            <p class="text-muted mb-0">No candidate applications received yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Quick Navigation Card -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-lightning-charge text-warning me-2"></i>Quick Actions</h5>
+                <div class="d-grid gap-3">
+                    <a href="{% url 'recruiter_jobs' %}" class="btn btn-light border text-start p-3 rounded-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-semibold text-dark">Manage Job Listings</div>
+                            <small class="text-muted">View, edit, or delete your posted jobs</small>
+                        </div>
+                        <i class="bi bi-arrow-right text-primary"></i>
+                    </a>
+                    <a href="{% url 'create_job' %}" class="btn btn-light border text-start p-3 rounded-3 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-semibold text-dark">Post a New Job</div>
+                            <small class="text-muted">Create a new job posting for candidates</small>
+                        </div>
+                        <i class="bi bi-arrow-right text-primary"></i>
                     </a>
                 </div>
-            {% endif %}
+            </div>
         </div>
     </div>
 </div>

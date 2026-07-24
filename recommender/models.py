@@ -201,6 +201,8 @@ class Application(models.Model):
         default="Pending"
     )
 
+    cover_letter = models.TextField(blank=True)
+
     applied_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

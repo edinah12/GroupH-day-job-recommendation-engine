@@ -45,11 +45,19 @@
                     </div>
                 </div>
 
+                {% if not user.is_authenticated or not user.profile.is_recruiter %}
                 <div class="d-none d-sm-block">
-                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm">
+                    {% if has_applied %}
+                    <a href="{% url 'apply_job' job.id %}" class="btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm">
+                        <i class="bi bi-check-circle-fill me-1"></i> Application Submitted
+                    </a>
+                    {% else %}
+                    <a href="{% url 'apply_job' job.id %}" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm">
                         <i class="bi bi-send-fill me-1"></i> Apply Now
                     </a>
+                    {% endif %}
                 </div>
+                {% endif %}
             </div>
         </div>
 
@@ -90,8 +98,7 @@
                         </div>
                         <div>
                             <small class="text-muted d-block lh-1">Experience</small>
-                            <span class="fw-semibold text-dark fs-6">{{ job.experience_required }} year{% if
-                                job.experience_required != 1 %}s{% endif %}</span>
+                            <span class="fw-semibold text-dark fs-6">{{ job.experience_required }} year{{ job.experience_required|pluralize }}</span>
                         </div>
                     </div>
                 </div>
@@ -159,9 +166,17 @@
                     <i class="bi bi-arrow-left me-1"></i> Back to Jobs
                 </a>
 
-                <a href="#" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm fw-semibold">
-                    <i class="bi bi-send-fill me-2"></i> Apply Now
-                </a>
+                {% if not user.is_authenticated or not user.profile.is_recruiter %}
+                    {% if has_applied %}
+                    <a href="{% url 'apply_job' job.id %}" class="btn btn-success btn-lg rounded-pill px-5 shadow-sm fw-semibold">
+                        <i class="bi bi-check-circle-fill me-2"></i> Application Submitted
+                    </a>
+                    {% else %}
+                    <a href="{% url 'apply_job' job.id %}" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm fw-semibold">
+                        <i class="bi bi-send-fill me-2"></i> Apply Now
+                    </a>
+                    {% endif %}
+                {% endif %}
             </div>
         </div>
     </div>

@@ -1,5 +1,5 @@
 from django import forms
-from recommender.models import Job, Company, JobCategory
+from recommender.models import Job, Company, JobCategory, Application
 
 
 class JobForm(forms.ModelForm):
@@ -58,3 +58,26 @@ class JobForm(forms.ModelForm):
         if commit:
             job.save()
         return job
+
+
+class JobApplicationForm(forms.ModelForm):
+    resume = forms.FileField(
+        required=False,
+        label="Upload/Update Resume (Optional)",
+        help_text="Supported formats: PDF, DOC, DOCX",
+        widget=forms.FileInput(attrs={"class": "form-control"})
+    )
+
+    class Meta:
+        model = Application
+        fields = ["cover_letter"]
+        widgets = {
+            "cover_letter": forms.Textarea(
+                attrs={
+                    "rows": 5,
+                    "class": "form-control",
+                    "placeholder": "Write a brief cover letter or note to the recruiter explaining why you are a good fit for this role...",
+                }
+            ),
+        }
+

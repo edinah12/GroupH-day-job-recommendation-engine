@@ -18,14 +18,32 @@ def dashboard(request):
 def recruiter_dashboard(request):
     posted_jobs = Job.objects.filter(posted_by=request.user).order_by("-posted_at")
     total_applications = Application.objects.filter(job__posted_by=request.user).count()
+    recent_applications = (
+        Application.objects.filter(job__posted_by=request.user)
+        .select_related("user", "job")
+        .order_by("-applied_at")[:5]
+    )
 
     return render(
         request,
         "dashboard/recruiter.html",
         {
-            "jobs": posted_jobs,
             "total_jobs": posted_jobs.count(),
             "total_applications": total_applications,
+            "recent_applications": recent_applications,
+        },
+    )
+
+
+@recruiter_required
+def recruiter_jobs(request):
+    posted_jobs = Job.objects.filter(posted_by=request.user).order_by("-posted_at")
+
+    return render(
+        request,
+        "dashboard/recruiter_jobs.html",
+        {
+            "jobs": posted_jobs,
         },
     )
 

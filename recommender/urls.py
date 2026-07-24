@@ -2,10 +2,12 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 
 from .views.home import home
+from .views.companies import company_list, company_detail
 from .views.auth import register, CustomLoginView
 from .views.profile import create_profile, edit_profile, view_profile
-from .views.dashboard import dashboard, recruiter_dashboard, seeker_dashboard
+from .views.dashboard import dashboard, recruiter_dashboard, recruiter_jobs, seeker_dashboard
 from .views.jobs import (
+    job_list,
     job_detail,
     create_job,
     edit_job,
@@ -19,6 +21,7 @@ urlpatterns = [
     path("", home, name="home"),
     path("dashboard/", dashboard, name="dashboard"),
     path("recruiter/dashboard/", recruiter_dashboard, name="recruiter_dashboard"),
+    path("recruiter/jobs/", recruiter_jobs, name="recruiter_jobs"),
     path("seeker/dashboard/", seeker_dashboard, name="seeker_dashboard"),
     
     path("register/", register, name="register"),
@@ -58,6 +61,7 @@ urlpatterns = [
         name="password_reset_complete",
     ),
 
+    path("jobs/", job_list, name="job_list"),
     path("jobs/create/", create_job, name="create_job"),
     path("jobs/<int:job_id>/", job_detail, name="job_detail"),
     path("jobs/<int:job_id>/edit/", edit_job, name="edit_job"),
@@ -69,4 +73,7 @@ urlpatterns = [
     path("profile/", view_profile, name="view_profile"),
     path("profile/edit/", edit_profile, name="edit_profile"),
     path("profile/create/", create_profile, name="create_profile"),
+
+    path("companies/", company_list, name="company_list"),
+    path("companies/<int:company_id>/", company_detail, name="company_detail"),
 ]

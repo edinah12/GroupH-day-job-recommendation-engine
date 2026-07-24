@@ -26,8 +26,7 @@
 
             <div>
                 <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small">
-                    <i class="bi bi-briefcase text-primary me-1"></i> {{ jobs|length }} Position{% if jobs|length != 1
-                    %}s{% endif %} Available
+                    <i class="bi bi-briefcase text-primary me-1"></i> {{ jobs|length }} Position{{ jobs|length|pluralize }} Available
                 </span>
             </div>
         </div>
@@ -45,8 +44,7 @@
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <span class="badge badge-custom badge-primary-soft">{{ job.job_type }}</span>
-                        <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ job.posted_at|date:"M d, Y"
-                            }}</small>
+                        <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ job.posted_at|date:"M d, Y" }}</small>
                     </div>
 
                     <h3 class="h5 fw-bold mb-1">{{ job.title }}</h3>

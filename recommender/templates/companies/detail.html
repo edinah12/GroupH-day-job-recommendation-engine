@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}{{ company.name }} - Company Profile{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+
+    <!-- Company Header Card -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+                {% if company.logo %}
+                <img src="{{ company.logo.url }}" alt="{{ company.name }} logo" class="rounded-4 object-fit-cover" style="width: 72px; height: 72px;">
+                {% else %}
+                <div class="bg-primary-subtle text-primary rounded-4 d-flex align-items-center justify-content-center fw-bold fs-2" style="width: 72px; height: 72px; min-width: 72px;">
+                    {{ company.name|slice:":1"|upper }}
+                </div>
+                {% endif %}
+                <div>
+                    <h1 class="h3 fw-bold mb-1">{{ company.name }}</h1>
+                    <div class="d-flex flex-wrap align-items-center gap-3 text-muted small">
+                        <span><i class="bi bi-geo-alt text-primary me-1"></i>{{ company.location }}</span>
+                        {% if company.website %}
+                        <span><i class="bi bi-globe text-primary me-1"></i><a href="{{ company.website }}" target="_blank" rel="noopener" class="text-decoration-none">{{ company.website }}</a></span>
+                        {% endif %}
+                        {% if company.email %}
+                        <span><i class="bi bi-envelope text-primary me-1"></i>{{ company.email }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <a href="{% url 'company_list' %}" class="btn btn-outline-secondary rounded-pill px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Companies
+                </a>
+            </div>
+        </div>
+
+        {% if company.description %}
+        <hr class="my-3 text-muted opacity-25">
+        <p class="text-secondary mb-0">
+            {{ company.description }}
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Active Openings Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 fw-bold mb-0">
+            Active Job Openings at {{ company.name }}
+            <span class="badge bg-primary-subtle text-primary rounded-pill fs-6 ms-2">{{ jobs|length }}</span>
+        </h2>
+    </div>
+
+    <!-- Jobs List -->
+    <div class="row g-4 mb-5">
+        {% for job in jobs %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card card-modern h-100 border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge bg-primary-subtle text-primary border-0 rounded-pill">{{ job.job_type }}</span>
+                        <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ job.posted_at|date:"M d, Y" }}</small>
+                    </div>
+
+                    <h3 class="h5 fw-bold mb-1">{{ job.title }}</h3>
+                    <h6 class="text-muted mb-3 fw-normal">{{ job.category.name }}</h6>
+
+                    <div class="bg-light rounded-3 p-3 mb-3 small">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Location:</span>
+                            <span class="fw-medium">{{ job.location }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Salary:</span>
+                            <span class="fw-semibold text-primary">UGX {{ job.salary }}</span>
+                        </div>
+                    </div>
+
+                    <p class="card-text text-muted small mb-0">
+                        {{ job.description|truncatewords:20 }}
+                    </p>
+                </div>
+
+                <div class="card-footer bg-white border-0 p-4 pt-0">
+                    <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-primary w-100 rounded-pill">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+                <div class="mb-3 text-muted">
+                    <i class="bi bi-inbox fs-1"></i>
+                </div>
+                <h5 class="fw-bold">No Active Openings</h5>
+                <p class="text-muted small mb-0">
+                    This company does not have any open job postings at the moment.
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
