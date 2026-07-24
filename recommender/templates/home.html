@@ -1,76 +1,94 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Explore Opportunities{% endblock %}
+{% block title %}Home{% endblock %}
 
 {% block content %}
 
-<section class="bg-primary text-white py-5 mb-5 shadow-sm">
-    <div class="container text-center py-4">
-        <h1 class="display-4 fw-bold mb-3">Find Your Dream Job</h1>
-        <p class="lead mb-4 opacity-90">Discover personalized career opportunities posted by top recruiters.</p>
-        {% if user.is_authenticated and user.profile.is_recruiter %}
-            <a href="{% url 'create_job' %}" class="btn btn-light text-primary btn-lg fw-bold px-4 shadow">
-                + Post a New Job
-            </a>
-        {% else %}
-            <a href="#jobs-section" class="btn btn-light text-primary btn-lg fw-bold px-4 shadow">
-                Explore All Jobs
-            </a>
-        {% endif %}
-    </div>
-</section>
+<div class="container my-4">
 
-<div class="container my-5" id="jobs-section">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-1">Latest Job Listings</h2>
-            <p class="text-muted mb-0">Browse open positions available for job seekers.</p>
-        </div>
-        <span class="badge bg-secondary fs-6 px-3 py-2">{{ jobs|length }} Available</span>
-    </div>
-
-    <div class="row g-4">
-        {% for job in jobs %}
-            <div class="col-md-6 col-lg-4">
-                <div class="card border-0 shadow-sm h-100 position-relative">
-                    <div class="card-body p-4">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="badge bg-primary opacity-90">{{ job.job_type }}</span>
-                            <span class="badge bg-light text-dark border">{{ job.category.name }}</span>
-                        </div>
-                        <h5 class="fw-bold text-dark mb-1">
-                            <a href="{% url 'job_detail' job.id %}" class="text-decoration-none text-dark stretched-link">
-                                {{ job.title }}
-                            </a>
-                        </h5>
-                        <h6 class="text-primary fw-semibold mb-3">{{ job.company.name }}</h6>
-
-                        <div class="small text-muted mb-3">
-                            <div class="mb-1">📍 {{ job.location }}</div>
-                            <div class="mb-1">💵 ${{ job.salary|floatformat:0 }} / yr</div>
-                            <div>⏱️ Exp: {{ job.experience_required }} yr(s)</div>
-                        </div>
-
-                        <p class="text-secondary small mb-0" style="display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                            {{ job.description }}
-                        </p>
-                    </div>
-
-                    <div class="card-footer bg-white border-top-0 p-4 pt-0 d-flex justify-content-between align-items-center">
-                        <small class="text-muted">Posted {{ job.posted_at|timesince }} ago</small>
-                        <a href="{% url 'job_detail' job.id %}" class="btn btn-sm btn-outline-primary fw-bold z-1 position-relative">
-                            View Job →
-                        </a>
-                    </div>
+    <!-- Sleek Welcome Banner Card -->
+    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold fs-4 shadow-sm"
+                    style="width:52px; height:52px; min-width:52px;">
+                    {{ user.username|slice:":1"|upper }}
+                </div>
+                <div>
+                    <h1 class="h4 fw-bold mb-1">
+                        Welcome back, {{ user.get_full_name|default:user.username }}! 👋
+                    </h1>
+                    <p class="text-muted small mb-0">
+                        Explore opportunities from top companies and find your match.
+                    </p>
                 </div>
             </div>
-        {% empty %}
-            <div class="col-12 text-center py-5">
-                <p class="text-muted fs-5 mb-3">No job listings found at the moment.</p>
-                {% if user.is_authenticated and user.profile.is_recruiter %}
-                    <a href="{% url 'create_job' %}" class="btn btn-primary">Post the First Job</a>
-                {% endif %}
+
+            <div>
+                <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small">
+                    <i class="bi bi-briefcase text-primary me-1"></i> {{ jobs|length }} Position{% if jobs|length != 1
+                    %}s{% endif %} Available
+                </span>
             </div>
+        </div>
+    </div>
+
+    <!-- Job Listings Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 fw-bold mb-0">Latest Jobs</h2>
+    </div>
+
+    <div class="row g-4 mb-5">
+        {% for job in jobs %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card card-modern h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge badge-custom badge-primary-soft">{{ job.job_type }}</span>
+                        <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>{{ job.posted_at|date:"M d, Y"
+                            }}</small>
+                    </div>
+
+                    <h3 class="h5 fw-bold mb-1">{{ job.title }}</h3>
+                    <h6 class="text-muted mb-3 fw-normal">
+                        {{ job.company.name }}
+                    </h6>
+
+                    <div class="bg-light rounded-3 p-3 mb-3 small">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Location:</span>
+                            <span class="fw-medium">{{ job.location }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Salary:</span>
+                            <span class="fw-semibold text-primary">UGX {{ job.salary }}</span>
+                        </div>
+                    </div>
+
+                    <p class="card-text text-muted small mb-0">
+                        {{ job.description|truncatewords:20 }}
+                    </p>
+                </div>
+
+                <div class="card-footer bg-white border-0 p-4 pt-0">
+                    <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-primary w-100 rounded-pill">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="card card-modern p-5 text-center">
+                <div class="mb-3 text-muted">
+                    <i class="bi bi-inbox fs-1"></i>
+                </div>
+                <h5 class="fw-bold">No Jobs Available</h5>
+                <p class="text-muted small mb-0">
+                    There are currently no active job postings. Check back soon!
+                </p>
+            </div>
+        </div>
         {% endfor %}
     </div>
 </div>

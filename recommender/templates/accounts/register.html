@@ -1,76 +1,62 @@
 {% extends "base.html" %}
 
-{% block title %}
-Register
-{% endblock %}
+{% block title %}Register{% endblock %}
 
 {% block content %}
 
-<div class="container mt-5" style="max-width:520px;">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
 
-    <div class="card shadow">
+            <div class="card card-auth p-4 p-sm-5">
+                <div class="text-center mb-4">
+                    <div class="icon-box bg-primary-subtle text-primary mb-3 mx-auto">
+                        <i class="bi bi-person-plus-fill fs-3"></i>
+                    </div>
+                    <h1 class="h3 fw-bold mb-1">Create Account</h1>
+                    <p class="text-muted small">Get matched with your ideal job opportunities.</p>
+                </div>
 
-        <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
 
-            <h2 class="mb-2 text-center">
-                Create Account
-            </h2>
-            <p class="text-muted text-center mb-4">
-                Join to get personalized job recommendations.
-            </p>
-
-            <form method="post" novalidate>
-
-                {% csrf_token %}
-
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger">
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger p-2 small mb-3">
                         {{ form.non_field_errors }}
                     </div>
-                {% endif %}
+                    {% endif %}
 
-                {% for field in form %}
+                    {% for field in form %}
                     <div class="mb-3">
-                        <label class="form-label fw-semibold" for="{{ field.id_for_label }}">
+                        <label class="form-label" for="{{ field.id_for_label }}">
                             {{ field.label }}
                         </label>
-                        {% if field.name == 'role' %}
-                            <div class="d-flex gap-4 p-2 border rounded bg-light">
-                                {% for radio in field %}
-                                    <div class="form-check">
-                                        {{ radio.tag }}
-                                        <label class="form-check-label fw-bold" for="{{ radio.id_for_label }}">
-                                            {{ radio.choice_label }}
-                                        </label>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            {{ field }}
-                        {% endif %}
+                        {{ field }}
                         {% if field.help_text %}
-                            <div class="form-text">{{ field.help_text }}</div>
+                        <div class="form-text mt-1">{{ field.help_text }}</div>
                         {% endif %}
                         {% for error in field.errors %}
-                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        <div class="invalid-feedback d-block small mt-1">{{ error }}</div>
                         {% endfor %}
                     </div>
-                {% endfor %}
+                    {% endfor %}
 
-                <button type="submit" class="btn btn-primary w-100">
-                    Register
-                </button>
-            </form>
+                    <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill mt-2 fw-semibold">
+                        Register
+                    </button>
+                </form>
 
-            <p class="text-center mt-3 mb-0">
-                Already have an account?
-                <a href="{% url 'login' %}">Sign in</a>
-            </p>
+                <div class="text-center mt-4 pt-3 border-top">
+                    <p class="small text-muted mb-0">
+                        Already have an account?
+                        <a href="{% url 'login' %}" class="fw-semibold text-primary text-decoration-none ms-1">Sign
+                            in</a>
+                    </p>
+                </div>
+            </div>
 
         </div>
-
     </div>
-
 </div>
 
 {% endblock %}

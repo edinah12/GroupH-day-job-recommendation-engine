@@ -166,6 +166,11 @@ class Job(models.Model):
 
     posted_at = models.DateTimeField(auto_now_add=True)
 
+    def skills_list(self):
+        if not self.required_skills or not self.required_skills.strip():
+            return []
+        return [s.strip() for s in self.required_skills.split(",") if s.strip()]
+
     def __str__(self):
         return self.title 
     

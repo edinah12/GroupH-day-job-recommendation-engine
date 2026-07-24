@@ -1,101 +1,170 @@
 {% extends "base.html" %}
 
-{% block title %}{{ job.title }} - {{ job.company.name }}{% endblock %}
+{% block title %}{{ job.title }} | Job Details{% endblock %}
 
 {% block content %}
-<div class="container my-5" style="max-width: 860px;">
-    <div class="card shadow-sm border-0">
-        <div class="card-body p-4 p-md-5">
-            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
-                <div>
-                    <h1 class="h2 fw-bold text-dark mb-1">{{ job.title }}</h1>
-                    <h5 class="text-primary fw-semibold mb-0">{{ job.company.name }}</h5>
+
+<div class="container py-4 max-w-4xl">
+    <div class="mb-3">
+        <a href="{% url 'home' %}"
+            class="text-decoration-none text-muted small fw-semibold d-inline-flex align-items-center">
+            <i class="bi bi-arrow-left me-1"></i> Back to Jobs
+        </a>
+    </div>
+
+    <!-- Main Job Detail Card -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+
+        <!-- Header Section -->
+        <div class="p-4 p-md-5 border-bottom bg-white">
+            <div class="d-flex flex-wrap align-items-start justify-content-between gap-3">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="bg-primary-subtle text-primary rounded-4 d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm"
+                        style="width:64px; height:64px;">
+                        <i class="bi bi-building fs-2"></i>
+                    </div>
+
+                    <div>
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                            <span
+                                class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill fw-semibold small">
+                                {{ job.job_type }}
+                            </span>
+                            {% if job.category %}
+                            <span
+                                class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-1 rounded-pill small">
+                                {{ job.category.name }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <h1 class="h2 fw-bold text-dark mb-1">{{ job.title }}</h1>
+                        <p class="text-primary fw-semibold fs-5 mb-0">
+                            {{ job.company.name }}
+                        </p>
+                    </div>
                 </div>
-                <div class="d-flex gap-2">
-                    <span class="badge bg-primary fs-6 px-3 py-2">{{ job.job_type }}</span>
-                    <span class="badge bg-secondary fs-6 px-3 py-2">{{ job.category.name }}</span>
+
+                <div class="d-none d-sm-block">
+                    <a href="#" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold shadow-sm">
+                        <i class="bi bi-send-fill me-1"></i> Apply Now
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metric Details Strip -->
+        <div class="bg-light bg-opacity-50 p-4 border-bottom">
+            <div class="row g-3 text-start">
+                <div class="col-6 col-md-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                            style="width:36px; height:36px;">
+                            <i class="bi bi-geo-alt-fill fs-6"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block lh-1">Location</small>
+                            <span class="fw-semibold text-dark fs-6">{{ job.location }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                            style="width:36px; height:36px;">
+                            <i class="bi bi-cash-stack fs-6"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block lh-1">Salary</small>
+                            <span class="fw-bold text-success fs-6">UGX {{ job.salary }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                            style="width:36px; height:36px;">
+                            <i class="bi bi-clock-history fs-6"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block lh-1">Experience</small>
+                            <span class="fw-semibold text-dark fs-6">{{ job.experience_required }} year{% if
+                                job.experience_required != 1 %}s{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                            style="width:36px; height:36px;">
+                            <i class="bi bi-calendar-event fs-6"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block lh-1">Deadline</small>
+                            <span class="fw-semibold text-dark fs-6">{{ job.deadline|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body Content -->
+        <div class="p-4 p-md-5">
+            <!-- Job Description -->
+            <div class="mb-5">
+                <h3 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                    <span class="bg-primary rounded-pill d-inline-block" style="width:4px; height:18px;"></span>
+                    Job Description
+                </h3>
+                <div class="text-secondary leading-relaxed fs-6" style="color: #334155 !important;">
+                    {{ job.description|linebreaks }}
                 </div>
             </div>
 
-            <div class="row g-3 my-3 p-3 bg-light rounded text-center text-md-start">
-                <div class="col-md-3">
-                    <small class="text-muted d-block">Location</small>
-                    <strong class="text-dark">📍 {{ job.location }}</strong>
-                </div>
-                <div class="col-md-3">
-                    <small class="text-muted d-block">Salary</small>
-                    <strong class="text-dark">💵 ${{ job.salary|floatformat:0 }}</strong>
-                </div>
-                <div class="col-md-3">
-                    <small class="text-muted d-block">Experience Required</small>
-                    <strong class="text-dark">💼 {{ job.experience_required }} Year(s)</strong>
-                </div>
-                <div class="col-md-3">
-                    <small class="text-muted d-block">Deadline</small>
-                    <strong class="text-dark">📅 {{ job.deadline|date:"M d, Y" }}</strong>
+            <!-- Requirements -->
+            <div class="mb-5">
+                <h3 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                    <span class="bg-primary rounded-pill d-inline-block" style="width:4px; height:18px;"></span>
+                    Requirements
+                </h3>
+                <div class="text-secondary leading-relaxed fs-6" style="color: #334155 !important;">
+                    {{ job.requirements|linebreaks }}
                 </div>
             </div>
 
-            <div class="my-4">
-                <h5 class="fw-bold">Job Description</h5>
-                <p class="text-secondary" style="white-space: pre-line;">{{ job.description }}</p>
-            </div>
-
-            <div class="my-4">
-                <h5 class="fw-bold">Requirements</h5>
-                <p class="text-secondary" style="white-space: pre-line;">{{ job.requirements }}</p>
-            </div>
-
-            <div class="my-4">
-                <h5 class="fw-bold mb-2">Required Skills</h5>
+            <!-- Required Skills -->
+            {% if job.skills_list %}
+            <div class="mb-4">
+                <h3 class="h5 fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                    <span class="bg-primary rounded-pill d-inline-block" style="width:4px; height:18px;"></span>
+                    Required Skills
+                </h3>
                 <div class="d-flex flex-wrap gap-2">
-                    {% for skill in job.required_skills.split %}
-                        <span class="badge bg-light text-dark border px-3 py-2 fs-6">{{ skill|slugify }}</span>
-                    {% empty %}
-                        <span class="text-muted">{{ job.required_skills }}</span>
+                    {% for skill in job.skills_list %}
+                    <span
+                        class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fs-6 fw-medium">
+                        {{ skill }}
+                    </span>
                     {% endfor %}
                 </div>
             </div>
+            {% endif %}
 
-            <hr class="my-4">
-
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <a href="{% url 'home' %}" class="btn btn-outline-secondary px-4">
-                    ← Back to Jobs
+            <!-- Actions Bar -->
+            <div class="d-flex flex-wrap gap-3 mt-5 pt-4 border-top justify-content-between align-items-center">
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Jobs
                 </a>
 
-                <div class="d-flex gap-2">
-                    {% if is_owner %}
-                        <a href="{% url 'job_applicants' job.id %}" class="btn btn-outline-primary fw-bold px-3">
-                            👥 View Applicants ({{ job.applications.count }})
-                        </a>
-                        <a href="{% url 'edit_job' job.id %}" class="btn btn-warning fw-bold px-3">
-                            ✏️ Edit Job
-                        </a>
-                        <a href="{% url 'delete_job' job.id %}" class="btn btn-outline-danger px-3">
-                            Delete
-                        </a>
-                    {% elif user.is_authenticated and user.profile.is_seeker %}
-                        {% if has_applied %}
-                            <button class="btn btn-success btn-lg px-5 disabled" disabled>
-                                ✓ Applied
-                            </button>
-                        {% else %}
-                            <form action="{% url 'apply_job' job.id %}" method="post">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-success btn-lg px-5 fw-bold shadow-sm">
-                                    Apply Now
-                                </button>
-                            </form>
-                        {% endif %}
-                    {% elif not user.is_authenticated %}
-                        <a href="{% url 'login' %}?next={% url 'job_detail' job.id %}" class="btn btn-primary btn-lg px-5 fw-bold">
-                            Login to Apply
-                        </a>
-                    {% endif %}
-                </div>
+                <a href="#" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm fw-semibold">
+                    <i class="bi bi-send-fill me-2"></i> Apply Now
+                </a>
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}

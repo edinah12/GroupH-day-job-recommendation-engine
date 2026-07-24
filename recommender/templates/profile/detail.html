@@ -4,172 +4,139 @@
 
 {% block content %}
 
-<div class="container mt-5" style="max-width:900px;">
+<div class="container py-5 max-w-4xl">
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-        <div>
-            <h1 class="h3 mb-1">{{ profile.user.get_full_name|default:profile.user.username }}</h1>
-            <p class="text-muted mb-0">
-                @{{ profile.user.username }} · <span class="badge bg-primary">{{ profile.get_role_display }}</span>
-                {% if profile.user.email %} · {{ profile.user.email }}{% endif %}
-            </p>
+    <!-- Profile Header Card -->
+    <div class="card card-modern border-0 p-4 p-md-5 mb-4 shadow-sm">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-4">
+            <div class="d-flex align-items-center gap-4 flex-wrap">
+                {% if profile.profile_picture %}
+                <img src="{{ profile.profile_picture.url }}" alt="Profile photo"
+                    class="rounded-circle shadow-sm border border-3 border-white"
+                    style="width:110px; height:110px; object-fit:cover;">
+                {% else %}
+                <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex align-items-center justify-content-center fw-bold fs-1 shadow-sm"
+                    style="width:110px; height:110px;">
+                    {{ profile.user.username|slice:":1"|upper }}
+                </div>
+                {% endif %}
+
+                <div>
+                    <h1 class="h3 fw-bold mb-1">{{ profile.user.get_full_name|default:profile.user.username }}</h1>
+                    <p class="text-muted mb-2">@{{ profile.user.username }}{% if profile.user.email %} · <i
+                            class="bi bi-envelope me-1"></i>{{ profile.user.email }}{% endif %}</p>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if profile.preferred_location %}
+                        <span class="badge bg-light text-dark border">
+                            <i class="bi bi-geo-alt text-primary me-1"></i> {{ profile.preferred_location }}
+                        </span>
+                        {% endif %}
+                        <span class="badge bg-light text-dark border">
+                            <i class="bi bi-briefcase text-info me-1"></i> {{ profile.experience }} Year{% if
+                            profile.experience != 1 %}s{% endif %} Exp
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary rounded-pill px-4">
+                    <i class="bi bi-pencil me-1"></i> Edit Profile
+                </a>
+            </div>
         </div>
-        <a href="{% url 'edit_profile' %}" class="btn btn-primary">Edit Profile</a>
     </div>
 
     {% if not profile.is_complete %}
-        <div class="alert alert-warning">
-            Your profile is incomplete. Please complete your profile details.
-            <a href="{% url 'edit_profile' %}" class="alert-link">Complete Profile</a>
+    <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center gap-3 p-4 rounded-4 mb-4">
+        <i class="bi bi-exclamation-triangle-fill fs-2 text-warning"></i>
+        <div>
+            <h5 class="fw-bold mb-1">Your profile is incomplete</h5>
+            <p class="mb-0 small">Add your skills and background to receive personalized job matches.</p>
         </div>
+        <a href="{% url 'edit_profile' %}" class="btn btn-warning btn-sm rounded-pill ms-auto fw-semibold text-nowrap">
+            Complete Now
+        </a>
+    </div>
     {% endif %}
 
-    {% if profile.is_recruiter %}
-        <!-- Recruiter Profile Display -->
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card shadow-sm h-100 text-center p-3">
-                    <div class="card-body">
-                        {% if profile.profile_picture %}
-                            <img src="{{ profile.profile_picture.url }}" alt="Profile photo" class="rounded-circle img-fluid mb-3" style="width:140px; height:140px; object-fit:cover;">
-                        {% else %}
-                            <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width:140px; height:140px;">
-                                <span class="display-4">{{ profile.user.username|slice:":1"|upper }}</span>
-                            </div>
-                        {% endif %}
-                        <h5 class="fw-bold mb-1">{{ profile.company_name|default:"Company Name Not Set" }}</h5>
-                        <p class="text-muted mb-0">{{ profile.designation|default:"Recruiter" }}</p>
-                    </div>
-                </div>
+    <div class="row g-4">
+        <!-- Main Info Column -->
+        <div class="col-md-8">
+            <div class="card card-modern p-4 mb-4">
+                <h3 class="h5 fw-bold mb-3 border-bottom pb-2">
+                    <i class="bi bi-person-text me-2 text-primary"></i> About Me
+                </h3>
+                <p class="text-secondary mb-0 leading-relaxed">
+                    {{ profile.bio|default:"No bio added yet. Click edit profile to add a brief introduction." }}
+                </p>
             </div>
 
-            <div class="col-md-8">
-                <div class="card shadow-sm mb-4">
-                    <div class="card-body">
-                        <h5 class="fw-bold mb-3">Company Info</h5>
-                        <div class="row g-3">
-                            <div class="col-sm-6">
-                                <small class="text-muted d-block">Company Name</small>
-                                <strong>{{ profile.company_name|default:"—" }}</strong>
-                            </div>
-                            <div class="col-sm-6">
-                                <small class="text-muted d-block">Company Website</small>
-                                {% if profile.company_website %}
-                                    <a href="{{ profile.company_website }}" target="_blank" class="text-decoration-none">{{ profile.company_website }}</a>
-                                {% else %}
-                                    <span>—</span>
-                                {% endif %}
-                            </div>
-                            <div class="col-sm-6">
-                                <small class="text-muted d-block">Designation / Title</small>
-                                <strong>{{ profile.designation|default:"—" }}</strong>
-                            </div>
-                            <div class="col-sm-6">
-                                <small class="text-muted d-block">Contact Phone</small>
-                                <strong>{{ profile.phone|default:"—" }}</strong>
-                            </div>
-                        </div>
-                    </div>
+            <div class="card card-modern p-4 mb-4">
+                <h3 class="h5 fw-bold mb-3 border-bottom pb-2">
+                    <i class="bi bi-stars me-2 text-primary"></i> Skills & Expertise
+                </h3>
+                {% if profile.skills_list %}
+                <div class="d-flex flex-wrap gap-2">
+                    {% for skill in profile.skills_list %}
+                    <span
+                        class="badge badge-custom badge-primary-soft border border-primary border-opacity-20 px-3 py-2">
+                        {{ skill }}
+                    </span>
+                    {% endfor %}
                 </div>
-
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h5 class="fw-bold mb-2">Company Overview & Bio</h5>
-                        <p class="text-secondary mb-0" style="white-space: pre-line;">{{ profile.bio|default:"No company bio added yet." }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% else %}
-        <!-- Job Seeker Profile Display -->
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card shadow-sm h-100">
-                    <div class="card-body text-center">
-                        {% if profile.profile_picture %}
-                            <img src="{{ profile.profile_picture.url }}" alt="Profile photo" class="rounded-circle img-fluid mb-3" style="max-width:160px; object-fit:cover; aspect-ratio:1;">
-                        {% else %}
-                            <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3" style="width:160px; height:160px;">
-                                <span class="display-4 text-muted">{{ profile.user.username|slice:":1"|upper }}</span>
-                            </div>
-                        {% endif %}
-                        <p class="mb-1"><strong>{{ profile.experience }}</strong> years experience</p>
-                        {% if profile.preferred_location %}
-                            <p class="text-muted mb-0">{{ profile.preferred_location }}</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-8">
-                <div class="card shadow-sm mb-4">
-                    <div class="card-body">
-                        <h2 class="h5">About</h2>
-                        <p class="mb-0">{{ profile.bio|default:"No bio yet." }}</p>
-                    </div>
-                </div>
-
-                <div class="card shadow-sm mb-4">
-                    <div class="card-body">
-                        <h2 class="h5">Education</h2>
-                        <p class="mb-0">{{ profile.education|default:"Not specified." }}</p>
-                    </div>
-                </div>
-
-                <div class="card shadow-sm mb-4">
-                    <div class="card-body">
-                        <h2 class="h5">Skills</h2>
-                        {% if profile.skills_list %}
-                            <div class="d-flex flex-wrap gap-2">
-                                {% for skill in profile.skills_list %}
-                                    <span class="badge text-bg-primary">{{ skill }}</span>
-                                {% endfor %}
-                            </div>
-                        {% else %}
-                            <p class="mb-0 text-muted">No skills listed yet.</p>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="row g-4">
-                    <div class="col-sm-6">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body">
-                                <h2 class="h6 text-muted">Phone</h2>
-                                <p class="mb-0">{{ profile.phone|default:"—" }}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body">
-                                <h2 class="h6 text-muted">Expected salary</h2>
-                                <p class="mb-0">
-                                    {% if profile.expected_salary %}
-                                        ${{ profile.expected_salary|floatformat:0 }}
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {% if profile.resume %}
-                    <div class="card shadow-sm mt-4">
-                        <div class="card-body d-flex justify-content-between align-items-center">
-                            <div>
-                                <h2 class="h6 mb-1">Resume</h2>
-                                <p class="text-muted mb-0">Uploaded and ready for applications.</p>
-                            </div>
-                            <a href="{{ profile.resume.url }}" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener">Download</a>
-                        </div>
-                    </div>
+                {% else %}
+                <p class="text-muted mb-0 small">No skills listed yet.</p>
                 {% endif %}
             </div>
+
+            <div class="card card-modern p-4">
+                <h3 class="h5 fw-bold mb-3 border-bottom pb-2">
+                    <i class="bi bi-journal-bookmark me-2 text-primary"></i> Education
+                </h3>
+                <p class="text-secondary mb-0">
+                    {{ profile.education|default:"Education details not specified." }}
+                </p>
+            </div>
         </div>
-    {% endif %}
+
+        <!-- Sidebar Info Column -->
+        <div class="col-md-4">
+            <div class="card card-modern p-4 mb-4">
+                <h3 class="h6 fw-bold mb-3 text-muted text-uppercase tracking-wider">Contact Info</h3>
+                <div class="mb-3">
+                    <small class="text-muted d-block mb-1"><i class="bi bi-telephone me-1"></i> Phone</small>
+                    <span class="fw-semibold text-dark">{{ profile.phone|default:"Not provided" }}</span>
+                </div>
+                <div>
+                    <small class="text-muted d-block mb-1"><i class="bi bi-currency-dollar me-1"></i> Expected
+                        Salary</small>
+                    <span class="fw-bold text-success">
+                        {% if profile.expected_salary %}
+                        UGX {{ profile.expected_salary }}
+                        {% else %}
+                        Not specified
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            {% if profile.resume %}
+            <div class="card card-modern p-4 text-center">
+                <div class="icon-box bg-success-subtle text-success mx-auto mb-3">
+                    <i class="bi bi-file-earmark-pdf fs-3"></i>
+                </div>
+                <h4 class="h6 fw-bold mb-1">Resume Uploaded</h4>
+                <p class="text-muted small mb-3">Your resume is ready for applications.</p>
+                <a href="{{ profile.resume.url }}" class="btn btn-outline-success btn-sm rounded-pill w-100"
+                    target="_blank" rel="noopener">
+                    <i class="bi bi-download me-1"></i> Download Resume
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 
 </div>
 
