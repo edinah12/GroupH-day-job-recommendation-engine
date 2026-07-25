@@ -1,91 +1,290 @@
 {% extends "base.html" %}
 
-{% block title %}
-Home
-{% endblock %}
+{% block title %}Home{% endblock %}
+{% block meta_description %}Discover jobs matched to your skills using our smart weighted recommendation engine.{% endblock %}
 
 {% block content %}
 
-<section class="bg-light py-5">
+<!-- ── Hero ───────────────────────────────────────────────────────── -->
+<section style="background:linear-gradient(135deg,#0A2463 0%,#1a3a7c 55%,#3E92CC 100%);padding:5rem 0 4rem;position:relative;overflow:hidden;">
+  <!-- background pattern -->
+  <div style="position:absolute;inset:0;opacity:.06;background-image:radial-gradient(circle,#fff 1px,transparent 1px);background-size:28px 28px;"></div>
 
-    <div class="container text-center">
-
-        <h1 class="display-4 fw-bold">
-            Find Your Dream Job
+  <div class="container position-relative">
+    <div class="row align-items-center gy-4">
+      <div class="col-lg-6">
+        <span class="badge mb-3 px-3 py-2" style="background:rgba(255,255,255,.15);color:#fff;border-radius:50px;font-size:.78rem;letter-spacing:.5px;">
+          <i class="bi bi-stars me-1"></i> Smart Job Matching
+        </span>
+        <h1 class="text-white fw-800 mb-3" style="font-size:clamp(2rem,4vw,3rem);line-height:1.15;">
+          Find Your<br/>
+          <span style="color:#7dd3fc;">Dream Job</span><br/>
+          With Precision
         </h1>
-
-        <p class="lead">
-            Browse opportunities from top companies.
+        <p style="color:rgba(255,255,255,.8);font-size:1.05rem;max-width:480px;line-height:1.7;" class="mb-4">
+          Our weighted scoring engine matches you to jobs based on your skills, experience, location and salary expectations — no black boxes.
         </p>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="{% url 'recommended_jobs' %}" class="btn btn-lg px-4"
+             style="background:#fff;color:#0A2463;font-weight:700;border-radius:10px;">
+            <i class="bi bi-stars me-2"></i>View Recommendations
+          </a>
+          {% if not user.is_authenticated %}
+          <a href="{% url 'register' %}" class="btn btn-lg px-4"
+             style="background:rgba(255,255,255,.15);color:#fff;font-weight:600;border:1.5px solid rgba(255,255,255,.3);border-radius:10px;">
+            Get Started Free
+          </a>
+          {% endif %}
+        </div>
+      </div>
 
-        <a href="#" class="btn btn-primary btn-lg">
-            Browse Jobs
-        </a>
-
+      <!-- Stats cards -->
+      <div class="col-lg-5 offset-lg-1">
+        <div class="row g-3">
+          {% for stat in hero_stats %}
+          <div class="col-6">
+            <div class="p-3 rounded-3 text-center" style="background:rgba(255,255,255,.1);backdrop-filter:blur(8px);">
+              <div style="font-size:1.6rem;font-weight:800;color:#fff;">{{ stat.value }}</div>
+              <div style="font-size:.78rem;color:rgba(255,255,255,.7);">{{ stat.label }}</div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="col-6">
+            <div class="p-3 rounded-3 text-center" style="background:rgba(255,255,255,.1);">
+              <div style="font-size:1.6rem;font-weight:800;color:#fff;">500+</div>
+              <div style="font-size:.78rem;color:rgba(255,255,255,.7);">Active Jobs</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-3 rounded-3 text-center" style="background:rgba(255,255,255,.1);">
+              <div style="font-size:1.6rem;font-weight:800;color:#fff;">100%</div>
+              <div style="font-size:.78rem;color:rgba(255,255,255,.7);">Score Transparency</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-3 rounded-3 text-center" style="background:rgba(255,255,255,.1);">
+              <div style="font-size:1.6rem;font-weight:800;color:#fff;">5 Factors</div>
+              <div style="font-size:.78rem;color:rgba(255,255,255,.7);">Matching Criteria</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-3 rounded-3 text-center" style="background:rgba(255,255,255,.1);">
+              <div style="font-size:1.6rem;font-weight:800;color:#fff;">Free</div>
+              <div style="font-size:.78rem;color:rgba(255,255,255,.7);">Always</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
     </div>
-
+  </div>
 </section>
 
-<div class="container my-5">
+<!-- ── Profile completion nudge ───────────────────────────────────── -->
+{% if needs_profile %}
+<div class="container mt-4">
+  <div class="alert d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 p-4"
+       style="background:linear-gradient(90deg,#dbeafe,#ede9fe);border-radius:14px;border:none;">
+    <div class="d-flex align-items-start gap-3">
+      <div style="width:44px;height:44px;border-radius:12px;background:#3b82f6;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+        <i class="bi bi-person-badge text-white fs-5"></i>
+      </div>
+      <div>
+        <div class="fw-700" style="color:#1e40af;">Complete your profile to unlock recommendations</div>
+        <div style="font-size:.85rem;color:#3730a3;">Add your skills, experience and preferences to get personalised job matches.</div>
+      </div>
+    </div>
+    <a href="{% url 'create_profile' %}" class="btn btn-sm px-4 py-2 flex-shrink-0"
+       style="background:#3b82f6;color:#fff;border-radius:9px;font-weight:600;">
+      Complete Profile <i class="bi bi-arrow-right ms-1"></i>
+    </a>
+  </div>
+</div>
+{% endif %}
 
-    <h2 class="mb-4">
-        Latest Jobs
-    </h2>
+<!-- ── Top 3 Recommendations preview ─────────────────────────────── -->
+{% if recommended_jobs %}
+<section class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <p class="section-label mb-1"><i class="bi bi-stars me-1"></i>Personalised for You</p>
+      <h2 class="mb-0" style="font-size:1.5rem;">Top Recommendations</h2>
+    </div>
+    <a href="{% url 'recommended_jobs' %}" class="btn btn-outline-primary btn-sm px-3">
+      View all <i class="bi bi-arrow-right ms-1"></i>
+    </a>
+  </div>
 
-    <div class="row">
-
-        {% for job in jobs %}
-
-        <div class="col-md-6 col-lg-4 mb-4">
-
-            <div class="card shadow-sm h-100">
-
-                <div class="card-body">
-
-                    <h5>{{ job.title }}</h5>
-
-                    <h6 class="text-muted">
-                        {{ job.company.name }}
-                    </h6>
-
-                    <p>
-                        <strong>Location:</strong>
-                        {{ job.location }}
-                    </p>
-
-                    <p>
-                        <strong>Salary:</strong>
-                        UGX {{ job.salary }}
-                    </p>
-
-                    <p>
-                        {{ job.description|truncatewords:20 }}
-                    </p>
-
-                </div>
-
-                <div class="card-footer bg-white">
-
-                    <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-primary w-100">
-                    
-                        View Details
-                    
-                    </a>
-
-                </div>
-
-            </div>
-
+  <div class="row g-4">
+    {% for item in recommended_jobs %}
+    <div class="col-md-4">
+      <div class="card card-hover h-100" style="border-radius:14px;overflow:hidden;">
+        <!-- Score strip -->
+        <div style="height:4px;background:
+          {% if item.score >= 90 %}linear-gradient(90deg,#10b981,#34d399)
+          {% elif item.score >= 75 %}linear-gradient(90deg,#3b82f6,#60a5fa)
+          {% elif item.score >= 50 %}linear-gradient(90deg,#f59e0b,#fbbf24)
+          {% else %}linear-gradient(90deg,#94a3b8,#cbd5e1){% endif %};">
         </div>
+        <div class="card-body d-flex flex-column p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <h5 class="mb-1" style="font-size:.97rem;font-weight:700;">{{ item.job.title }}</h5>
+              <span class="text-muted" style="font-size:.82rem;">{{ item.job.company.name }}</span>
+            </div>
+            <span class="badge rounded-pill"
+                  style="font-size:.72rem;
+                    {% if item.score >= 90 %}background:#d1fae5;color:#065f46;
+                    {% elif item.score >= 75 %}background:#dbeafe;color:#1e40af;
+                    {% elif item.score >= 50 %}background:#fef3c7;color:#92400e;
+                    {% else %}background:#f1f5f9;color:#475569;{% endif %}">
+              {{ item.score }}%
+            </span>
+          </div>
 
-        {% empty %}
+          <div class="d-flex flex-wrap gap-2 mb-3" style="font-size:.78rem;color:#64748B;">
+            <span><i class="bi bi-geo-alt me-1"></i>{{ item.job.location }}</span>
+            <span><i class="bi bi-tag me-1"></i>{{ item.job.category.name }}</span>
+          </div>
 
-        <p>No jobs available.</p>
+          <!-- Progress bar -->
+          <div class="mb-3">
+            <div style="height:5px;border-radius:50px;background:#f1f5f9;overflow:hidden;">
+              <div style="height:100%;border-radius:50px;width:{{ item.score }}%;
+                background:{% if item.score >= 90 %}#10b981{% elif item.score >= 75 %}#3b82f6{% elif item.score >= 50 %}#f59e0b{% else %}#94a3b8{% endif %};">
+              </div>
+            </div>
+          </div>
 
-        {% endfor %}
+          <div class="mt-auto">
+            <a href="{% url 'job_detail' item.job.id %}"
+               class="btn btn-sm w-100"
+               style="background:#0A2463;color:#fff;border-radius:8px;font-weight:600;">
+              View Details
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 
+<!-- ── How it works ───────────────────────────────────────────────── -->
+<section style="background:#fff;padding:4rem 0;" class="my-2">
+  <div class="container">
+    <div class="text-center mb-5">
+      <p class="section-label">How It Works</p>
+      <h2 style="font-size:1.7rem;">Matched in 3 simple steps</h2>
+    </div>
+    <div class="row g-4 text-center">
+      {% for step in steps %}
+      <div class="col-md-4">
+        <div class="p-4">
+          <div class="mb-3 mx-auto" style="width:60px;height:60px;border-radius:16px;background:{{ step.bg }};display:flex;align-items:center;justify-content:center;">
+            <i class="bi {{ step.icon }}" style="font-size:1.5rem;color:{{ step.color }};"></i>
+          </div>
+          <h5 class="fw-700 mb-2">{{ step.title }}</h5>
+          <p class="text-muted" style="font-size:.87rem;">{{ step.desc }}</p>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-md-4">
+        <div class="p-4">
+          <div class="mb-3 mx-auto" style="width:60px;height:60px;border-radius:16px;background:#dbeafe;display:flex;align-items:center;justify-content:center;">
+            <i class="bi bi-person-circle" style="font-size:1.5rem;color:#3b82f6;"></i>
+          </div>
+          <h5 class="fw-700 mb-2">Create your profile</h5>
+          <p class="text-muted" style="font-size:.87rem;">Add your skills, years of experience, preferred location, and salary expectations.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="p-4">
+          <div class="mb-3 mx-auto" style="width:60px;height:60px;border-radius:16px;background:#d1fae5;display:flex;align-items:center;justify-content:center;">
+            <i class="bi bi-cpu" style="font-size:1.5rem;color:#10b981;"></i>
+          </div>
+          <h5 class="fw-700 mb-2">Engine scores every job</h5>
+          <p class="text-muted" style="font-size:.87rem;">Our algorithm scores each job across 5 weighted factors giving a transparent match percentage.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="p-4">
+          <div class="mb-3 mx-auto" style="width:60px;height:60px;border-radius:16px;background:#ede9fe;display:flex;align-items:center;justify-content:center;">
+            <i class="bi bi-send-check" style="font-size:1.5rem;color:#7c3aed;"></i>
+          </div>
+          <h5 class="fw-700 mb-2">Apply with confidence</h5>
+          <p class="text-muted" style="font-size:.87rem;">See exactly why each job was recommended and apply directly to opportunities above 40% match.</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── Latest Jobs grid ───────────────────────────────────────────── -->
+<section class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <p class="section-label mb-1"><i class="bi bi-briefcase me-1"></i>Latest Listings</p>
+      <h2 class="mb-0" style="font-size:1.5rem;">Browse All Jobs</h2>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    {% for job in jobs %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card card-hover h-100" style="border-radius:14px;">
+        <div class="card-body p-4 d-flex flex-column">
+          <div class="d-flex align-items-start gap-3 mb-3">
+            <div style="width:44px;height:44px;border-radius:10px;background:#f1f5f9;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+              <i class="bi bi-building" style="font-size:1.1rem;color:#475569;"></i>
+            </div>
+            <div class="flex-grow-1 min-w-0">
+              <h5 class="mb-0 text-truncate" style="font-size:.95rem;font-weight:700;">{{ job.title }}</h5>
+              <span class="text-muted" style="font-size:.8rem;">{{ job.company.name }}</span>
+            </div>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mb-3" style="font-size:.78rem;color:#64748B;">
+            <span><i class="bi bi-geo-alt me-1"></i>{{ job.location }}</span>
+            <span><i class="bi bi-currency-dollar me-1"></i>UGX {{ job.salary|floatformat:0 }}</span>
+          </div>
+
+          <p class="text-muted mb-3" style="font-size:.83rem;line-height:1.55;">
+            {{ job.description|truncatewords:18 }}
+          </p>
+
+          <div class="d-flex align-items-center justify-content-between mt-auto">
+            <span class="badge rounded-pill px-2 py-1"
+                  style="font-size:.72rem;
+                    {% if job.job_type == 'Remote' %}background:#d1fae5;color:#065f46;
+                    {% elif job.job_type == 'Full-Time' %}background:#dbeafe;color:#1e40af;
+                    {% elif job.job_type == 'Part-Time' %}background:#fef3c7;color:#92400e;
+                    {% elif job.job_type == 'Contract' %}background:#ede9fe;color:#5b21b6;
+                    {% else %}background:#fee2e2;color:#991b1b;{% endif %}">
+              {{ job.job_type }}
+            </span>
+            <a href="{% url 'job_detail' job.id %}"
+               class="btn btn-sm px-3"
+               style="background:#f1f5f9;color:#0A2463;border-radius:8px;font-weight:600;font-size:.8rem;">
+              View Job
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
 
-</div>
+    {% empty %}
+    <div class="col-12">
+      <div class="text-center py-5" style="border:2px dashed #E2E8F0;border-radius:14px;background:#fafafa;">
+        <i class="bi bi-briefcase" style="font-size:2.5rem;color:#cbd5e1;"></i>
+        <h5 class="mt-3 text-muted">No jobs listed yet</h5>
+        <p class="text-muted" style="font-size:.87rem;">Check back soon for new opportunities.</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
 
 {% endblock %}

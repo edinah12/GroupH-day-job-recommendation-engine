@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Recommended Jobs — Job Recommendation Engine{% endblock %}
+
+{% block content %}
+
+<style>
+  /* ── Page header ─────────────────────────────────────────── */
+  .rec-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    padding: 3.5rem 0 2.5rem;
+    margin-bottom: 0;
+  }
+  .rec-header h1 { color: #ffffff; font-weight: 700; letter-spacing: -0.5px; }
+  .rec-header p  { color: #94a3b8; font-size: 1.05rem; }
+
+  /* ── Stats bar ───────────────────────────────────────────── */
+  .stats-bar {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0.9rem 0;
+  }
+  .stat-item { text-align: center; padding: 0 1.5rem; }
+  .stat-item .stat-value { font-size: 1.5rem; font-weight: 700; color: #0f3460; line-height: 1; }
+  .stat-item .stat-label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  .stat-divider { width: 1px; background: #e2e8f0; align-self: stretch; }
+
+  /* ── Job cards ───────────────────────────────────────────── */
+  .job-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    overflow: hidden;
+    background: #ffffff;
+  }
+  .job-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(15, 52, 96, 0.12);
+    border-color: #93c5fd;
+  }
+  .card-score-strip {
+    height: 5px;
+    width: 100%;
+  }
+  .strip-excellent { background: linear-gradient(90deg, #10b981, #34d399); }
+  .strip-good      { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+  .strip-fair      { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .strip-poor      { background: linear-gradient(90deg, #94a3b8, #cbd5e1); }
+
+  .job-card .card-body { padding: 1.4rem 1.5rem 1rem; }
+
+  /* ── Match badge ─────────────────────────────────────────── */
+  .match-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    padding: 0.35em 0.7em;
+    border-radius: 50px;
+  }
+  .badge-excellent { background-color: #d1fae5; color: #065f46; }
+  .badge-good      { background-color: #dbeafe; color: #1e40af; }
+  .badge-fair      { background-color: #fef3c7; color: #92400e; }
+  .badge-poor      { background-color: #f1f5f9; color: #475569; }
+
+  /* ── Job title & meta ────────────────────────────────────── */
+  .job-title { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
+  .company-name { font-size: 0.88rem; color: #64748b; margin-bottom: 0; }
+  .job-meta { font-size: 0.83rem; color: #475569; }
+  .job-meta span { margin-right: 0.9rem; }
+  .job-meta i { margin-right: 3px; opacity: 0.6; }
+
+  /* ── Progress bar ────────────────────────────────────────── */
+  .match-progress { height: 8px; border-radius: 50px; background: #f1f5f9; overflow: hidden; }
+  .match-progress .progress-bar {
+    border-radius: 50px;
+    transition: width 0.8s ease;
+  }
+  .bar-excellent { background: linear-gradient(90deg, #10b981, #34d399); }
+  .bar-good      { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+  .bar-fair      { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .bar-poor      { background: linear-gradient(90deg, #94a3b8, #cbd5e1); }
+
+  /* ── Score percentage ────────────────────────────────────── */
+  .score-pct { font-size: 1.4rem; font-weight: 800; line-height: 1; }
+  .score-excellent { color: #10b981; }
+  .score-good      { color: #3b82f6; }
+  .score-fair      { color: #f59e0b; }
+  .score-poor      { color: #94a3b8; }
+  .score-sub { font-size: 0.7rem; color: #94a3b8; }
+
+  /* ── Action buttons ──────────────────────────────────────── */
+  .btn-apply {
+    background: linear-gradient(135deg, #0f3460, #1a5276);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    padding: 0.45rem 1rem;
+    transition: opacity 0.18s;
+  }
+  .btn-apply:hover { opacity: 0.88; color: #ffffff; }
+  .btn-details {
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.83rem;
+    font-weight: 600;
+    color: #475569;
+    padding: 0.45rem 1rem;
+    background: transparent;
+    transition: border-color 0.18s, color 0.18s;
+  }
+  .btn-details:hover { border-color: #3b82f6; color: #3b82f6; }
+
+  /* ── Empty state ─────────────────────────────────────────── */
+  .empty-state {
+    text-align: center;
+    padding: 5rem 1.5rem;
+    background: #f8fafc;
+    border: 2px dashed #e2e8f0;
+    border-radius: 20px;
+  }
+  .empty-icon { font-size: 4rem; margin-bottom: 1rem; opacity: 0.35; }
+  .empty-state h3 { color: #334155; font-weight: 700; }
+  .empty-state p  { color: #64748b; max-width: 420px; margin: 0 auto 1.5rem; }
+</style>
+
+<!-- ── Page header ──────────────────────────────────────────────────── -->
+<div class="rec-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+      <div>
+        <h1 class="mb-1">
+          Recommended Jobs
+          {% if request.user.first_name %}
+            for {{ request.user.first_name }}
+          {% endif %}
+        </h1>
+        <p class="mb-0">
+          Matched to your profile using a weighted scoring engine &mdash;
+          no black-box algorithms.
+        </p>
+      </div>
+      <a href="{% url 'home' %}" class="btn btn-outline-light align-self-start">
+        &larr; Back to Home
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ── Stats bar ────────────────────────────────────────────────────── -->
+{% if recommended_jobs %}
+<div class="stats-bar">
+  <div class="container">
+    <div class="d-flex align-items-center flex-wrap gap-2">
+
+      <div class="stat-item">
+        <div class="stat-value">{{ recommended_jobs|length }}</div>
+        <div class="stat-label">Matches Found</div>
+      </div>
+
+      <div class="stat-divider d-none d-sm-block"></div>
+
+      <div class="stat-item">
+        <div class="stat-value">{{ recommended_jobs.0.score }}%</div>
+        <div class="stat-label">Top Score</div>
+      </div>
+
+      <div class="stat-divider d-none d-sm-block"></div>
+
+      <div class="stat-item">
+        <div class="stat-value">40%</div>
+        <div class="stat-label">Min Threshold</div>
+      </div>
+
+      <div class="ms-auto d-none d-md-block">
+        <span class="badge bg-light text-secondary border" style="font-size:0.75rem;">
+          Scoring: Skills 50 &bull; Exp 20 &bull; Location 10 &bull; Category 10 &bull; Salary 10
+        </span>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ── Main content ──────────────────────────────────────────────────── -->
+<div class="container py-5">
+
+  {% if recommended_jobs %}
+
+  <div class="row g-4">
+
+    {% for item in recommended_jobs %}
+
+    {# ── Determine tier for this card ── #}
+    {% if item.score >= 90 %}
+      {% with tier="excellent" tier_label="Excellent Match" %}
+      {% include "recommendations/_job_card.html" %}
+      {% endwith %}
+    {% elif item.score >= 75 %}
+      {% with tier="good" tier_label="Good Match" %}
+      {% include "recommendations/_job_card.html" %}
+      {% endwith %}
+    {% elif item.score >= 50 %}
+      {% with tier="fair" tier_label="Fair Match" %}
+      {% include "recommendations/_job_card.html" %}
+      {% endwith %}
+    {% else %}
+      {% with tier="poor" tier_label="Poor Match" %}
+      {% include "recommendations/_job_card.html" %}
+      {% endwith %}
+    {% endif %}
+
+    {% endfor %}
+
+  </div>
+
+  {% else %}
+
+  <!-- ── Empty state ── -->
+  <div class="empty-state">
+    <div class="empty-icon">&#128269;</div>
+    <h3>No Recommendations Yet</h3>
+    <p>
+      We couldn't find any jobs that match your profile above the 40% threshold.
+      Try updating your skills, preferred location, or expected salary to
+      unlock more matches.
+    </p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="{% url 'create_profile' %}" class="btn btn-primary">
+        Update My Profile
+      </a>
+      <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+        Browse All Jobs
+      </a>
+    </div>
+  </div>
+
+  {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,85 @@
+{% comment %}
+Partial template: a single recommendation job card.
+
+Expected context variables (set by the caller via {% with %}):
+    item       - dict {"job": Job, "score": float}
+    tier       - string: "excellent" | "good" | "fair" | "poor"
+    tier_label - string: human-readable tier name
+{% endcomment %}
+
+<div class="col-md-6 col-lg-4">
+  <div class="job-card h-100 d-flex flex-column shadow-sm">
+
+    <!-- Colour strip at top of card -->
+    <div class="card-score-strip strip-{{ tier }}"></div>
+
+    <div class="card-body d-flex flex-column flex-grow-1">
+
+      <!-- ── Header row: title + match badge ── -->
+      <div class="d-flex justify-content-between align-items-start mb-3 gap-2">
+        <div class="flex-grow-1 min-w-0">
+          <h2 class="job-title text-truncate" title="{{ item.job.title }}">
+            {{ item.job.title }}
+          </h2>
+          <p class="company-name">{{ item.job.company.name }}</p>
+        </div>
+        <span class="match-badge badge-{{ tier }} flex-shrink-0">
+          {{ tier_label }}
+        </span>
+      </div>
+
+      <!-- ── Job meta ── -->
+      <div class="job-meta mb-3">
+        <span>&#128205; {{ item.job.location }}</span>
+        <span>&#128193; {{ item.job.category.name }}</span>
+        <span>&#128338; {{ item.job.job_type }}</span>
+      </div>
+
+      <div class="job-meta mb-3">
+        <span>&#128184; UGX {{ item.job.salary|floatformat:0 }}</span>
+        <span>&#128203; {{ item.job.experience_required }} yr{{ item.job.experience_required|pluralize }} exp</span>
+      </div>
+
+      <!-- ── Deadline ── -->
+      <div class="job-meta mb-3">
+        <span>&#128197; Deadline: {{ item.job.deadline }}</span>
+      </div>
+
+      <!-- ── Score section ── -->
+      <div class="mt-auto">
+        <div class="d-flex justify-content-between align-items-baseline mb-1">
+          <span class="job-meta fw-semibold">Match Score</span>
+          <span class="score-pct score-{{ tier }}">{{ item.score }}%</span>
+        </div>
+
+        <div class="match-progress mb-1">
+          <div
+            class="progress-bar bar-{{ tier }}"
+            role="progressbar"
+            style="width: {{ item.score }}%;"
+            aria-valuenow="{{ item.score }}"
+            aria-valuemin="0"
+            aria-valuemax="100">
+          </div>
+        </div>
+
+        <div class="score-sub text-end mb-3">out of 100 points</div>
+
+        <!-- ── Action buttons ── -->
+        <div class="d-flex gap-2">
+          <a href="{% url 'job_detail' item.job.id %}"
+             class="btn btn-apply flex-grow-1"
+             id="apply-job-{{ item.job.id }}">
+            Apply Now
+          </a>
+          <a href="{% url 'job_detail' item.job.id %}"
+             class="btn btn-details flex-grow-1"
+             id="details-job-{{ item.job.id }}">
+            View Details
+          </a>
+        </div>
+
+      </div>
+    </div><!-- /card-body -->
+  </div><!-- /job-card -->
+</div><!-- /col -->

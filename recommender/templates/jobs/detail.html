@@ -1,61 +1,169 @@
 {% extends "base.html" %}
-
-{% block title %}
-{{ job.title }}
-{% endblock %}
+{% load job_filters %}
+{% block title %}{{ job.title }} — {{ job.company.name }}{% endblock %}
 
 {% block content %}
+<div class="container py-5">
 
-<div class="container my-5">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb" style="font-size:.82rem;">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+      <li class="breadcrumb-item active">{{ job.title }}</li>
+    </ol>
+  </nav>
 
-    <div class="card shadow">
+  <div class="row g-4">
 
-        <div class="card-body">
+    <!-- ── Left: Job details ────────────────────────────── -->
+    <div class="col-lg-8">
+      <div class="card border-0" style="border-radius:16px;">
+        <div class="card-body p-4 p-md-5">
 
-            <h2>{{ job.title }}</h2>
+          <!-- Header -->
+          <div class="d-flex align-items-start gap-4 mb-4">
+            <div style="width:60px;height:60px;border-radius:14px;background:#f1f5f9;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+              <i class="bi bi-building" style="font-size:1.5rem;color:#475569;"></i>
+            </div>
+            <div class="flex-grow-1">
+              <h1 style="font-size:1.5rem;font-weight:800;margin-bottom:.25rem;">{{ job.title }}</h1>
+              <div class="text-muted fw-500" style="font-size:.95rem;">{{ job.company.name }}</div>
+            </div>
+          </div>
 
-            <h5 class="text-muted">
-                {{ job.company.name }}
-            </h5>
+          <!-- Meta pills -->
+          <div class="d-flex flex-wrap gap-2 mb-4">
+            <span class="badge px-3 py-2 rounded-pill" style="background:#f1f5f9;color:#475569;font-size:.8rem;font-weight:500;">
+              <i class="bi bi-geo-alt me-1"></i>{{ job.location }}
+            </span>
+            <span class="badge px-3 py-2 rounded-pill" style="background:#f1f5f9;color:#475569;font-size:.8rem;font-weight:500;">
+              <i class="bi bi-tag me-1"></i>{{ job.category.name }}
+            </span>
+            <span class="badge px-3 py-2 rounded-pill" style="font-size:.8rem;font-weight:500;
+              {% if job.job_type == 'Remote' %}background:#d1fae5;color:#065f46;
+              {% elif job.job_type == 'Full-Time' %}background:#dbeafe;color:#1e40af;
+              {% elif job.job_type == 'Part-Time' %}background:#fef3c7;color:#92400e;
+              {% elif job.job_type == 'Contract' %}background:#ede9fe;color:#5b21b6;
+              {% else %}background:#fee2e2;color:#991b1b;{% endif %}">
+              <i class="bi bi-clock me-1"></i>{{ job.job_type }}
+            </span>
+            <span class="badge px-3 py-2 rounded-pill" style="background:#f1f5f9;color:#475569;font-size:.8rem;font-weight:500;">
+              <i class="bi bi-calendar me-1"></i>Deadline: {{ job.deadline }}
+            </span>
+          </div>
 
-            <hr>
+          <hr style="border-color:#f1f5f9;margin:1.5rem 0;">
 
-            <p><strong>Category:</strong> {{ job.category.name }}</p>
+          <!-- Description -->
+          <h5 class="fw-700 mb-3"><i class="bi bi-file-text text-accent me-2"></i>Job Description</h5>
+          <p style="font-size:.9rem;line-height:1.8;color:#374151;">{{ job.description }}</p>
 
-            <p><strong>Location:</strong> {{ job.location }}</p>
+          <hr style="border-color:#f1f5f9;margin:1.5rem 0;">
 
-            <p><strong>Salary:</strong> UGX {{ job.salary }}</p>
+          <!-- Requirements -->
+          <h5 class="fw-700 mb-3"><i class="bi bi-list-check text-accent me-2"></i>Requirements</h5>
+          <p style="font-size:.9rem;line-height:1.8;color:#374151;">{{ job.requirements }}</p>
 
-            <p><strong>Experience:</strong> {{ job.experience_required }} year(s)</p>
+          <hr style="border-color:#f1f5f9;margin:1.5rem 0;">
 
-            <p><strong>Job Type:</strong> {{ job.job_type }}</p>
-
-            <p><strong>Description</strong></p>
-
-            <p>{{ job.description }}</p>
-
-            <p><strong>Requirements</strong></p>
-
-            <p>{{ job.requirements }}</p>
-
-            <p><strong>Required Skills</strong></p>
-
-            <p>{{ job.required_skills }}</p>
-
-            <p><strong>Application Deadline:</strong> {{ job.deadline }}</p>
-
-            <a href="#" class="btn btn-success">
-                Apply Now
-            </a>
-
-            <a href="/" class="btn btn-secondary">
-                Back
-            </a>
+          <!-- Skills -->
+          <h5 class="fw-700 mb-3"><i class="bi bi-tools text-accent me-2"></i>Required Skills</h5>
+          <div class="d-flex flex-wrap gap-2">
+            {% for skill in job.required_skills|split:"," %}
+            <span class="badge px-3 py-2" style="background:#ede9fe;color:#5b21b6;border-radius:8px;font-weight:500;font-size:.8rem;">
+              {{ skill }}
+            </span>
+            {% endfor %}
+          </div>
 
         </div>
-
+      </div>
     </div>
 
-</div>
+    <!-- ── Right: Sidebar ───────────────────────────────── -->
+    <div class="col-lg-4">
 
+      <!-- Apply card -->
+      <div class="card border-0 mb-4" style="border-radius:16px;position:sticky;top:80px;">
+        <div class="card-body p-4">
+          <div class="mb-3 pb-3" style="border-bottom:1px solid #f1f5f9;">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span style="font-size:.78rem;color:#64748B;font-weight:500;">Salary</span>
+            </div>
+            <div style="font-size:1.4rem;font-weight:800;color:#0A2463;">
+              UGX {{ job.salary|floatformat:0 }}
+            </div>
+            <div style="font-size:.78rem;color:#64748B;">per year</div>
+          </div>
+
+          <div class="d-flex flex-column gap-2 mb-4" style="font-size:.83rem;color:#475569;">
+            <div class="d-flex gap-2">
+              <i class="bi bi-award text-accent mt-1"></i>
+              <span><strong>{{ job.experience_required }}</strong> year{{ job.experience_required|pluralize }} experience required</span>
+            </div>
+            <div class="d-flex gap-2">
+              <i class="bi bi-geo-alt text-accent mt-1"></i>
+              <span>{{ job.location }}</span>
+            </div>
+            <div class="d-flex gap-2">
+              <i class="bi bi-clock text-accent mt-1"></i>
+              <span>{{ job.job_type }}</span>
+            </div>
+            <div class="d-flex gap-2">
+              <i class="bi bi-calendar-x text-accent mt-1"></i>
+              <span>Closes {{ job.deadline }}</span>
+            </div>
+          </div>
+
+          <a href="#" class="btn w-100 mb-2 fw-700"
+             style="background:var(--clr-primary);color:#fff;border-radius:10px;padding:.75rem;">
+            <i class="bi bi-send me-2"></i>Apply Now
+          </a>
+          <a href="#" class="btn w-100"
+             style="background:#f1f5f9;color:#0A2463;border-radius:10px;padding:.65rem;font-weight:600;">
+            <i class="bi bi-bookmark me-2"></i>Save Job
+          </a>
+
+          <p class="text-center text-muted mb-0 mt-3" style="font-size:.74rem;">
+            <i class="bi bi-shield-check me-1"></i>Your data is safe with us
+          </p>
+        </div>
+      </div>
+
+      <!-- Company card -->
+      <div class="card border-0" style="border-radius:16px;">
+        <div class="card-body p-4">
+          <h6 class="fw-700 mb-3">About {{ job.company.name }}</h6>
+          <div class="d-flex flex-column gap-2" style="font-size:.83rem;color:#475569;">
+            {% if job.company.location %}
+            <div class="d-flex gap-2"><i class="bi bi-geo-alt text-accent"></i><span>{{ job.company.location }}</span></div>
+            {% endif %}
+            {% if job.company.website %}
+            <div class="d-flex gap-2"><i class="bi bi-globe text-accent"></i>
+              <a href="{{ job.company.website }}" target="_blank" style="color:var(--clr-accent);">Visit website</a>
+            </div>
+            {% endif %}
+            {% if job.company.email %}
+            <div class="d-flex gap-2"><i class="bi bi-envelope text-accent"></i><span>{{ job.company.email }}</span></div>
+            {% endif %}
+          </div>
+          {% if job.company.description %}
+          <p class="mt-3 mb-0 text-muted" style="font-size:.82rem;line-height:1.6;">
+            {{ job.company.description|truncatewords:30 }}
+          </p>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /row -->
+
+  <!-- Back button -->
+  <div class="mt-4">
+    <a href="{% url 'home' %}" class="btn btn-sm px-4" style="background:#f1f5f9;color:#0A2463;border-radius:9px;font-weight:600;">
+      <i class="bi bi-arrow-left me-1"></i>Back to Jobs
+    </a>
+  </div>
+
+</div>
 {% endblock %}

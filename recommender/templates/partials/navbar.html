@@ -1,0 +1,113 @@
+<nav class="navbar navbar-expand-lg app-navbar" aria-label="Main navigation">
+  <div class="container">
+
+    <!-- Brand -->
+    <a class="navbar-brand" href="{% url 'home' %}">
+      <span class="brand-icon"><i class="bi bi-briefcase-fill"></i></span>
+      JobMatch
+    </a>
+
+    <!-- Mobile toggler -->
+    <button class="navbar-toggler border-0" type="button"
+            data-bs-toggle="collapse" data-bs-target="#mainNav"
+            aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Nav links -->
+    <div class="collapse navbar-collapse" id="mainNav">
+
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-3 gap-1">
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}"
+             href="{% url 'home' %}">
+            <i class="bi bi-house"></i> Home
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'recommended_jobs' %}active{% endif %}"
+             href="{% url 'recommended_jobs' %}">
+            <i class="bi bi-stars"></i> Recommendations
+          </a>
+        </li>
+        {% if user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+             href="{% url 'dashboard' %}">
+            <i class="bi bi-grid"></i> Dashboard
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+
+      <!-- Right side -->
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-1">
+
+        {% if user.is_authenticated %}
+
+          <!-- Avatar dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 py-1 px-2"
+               href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="nav-avatar">
+                {{ user.username|first|upper }}
+              </div>
+              <span class="d-none d-lg-inline text-white fw-600" style="font-size:.85rem;">
+                {{ user.username }}
+              </span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2" style="min-width:200px;">
+              <li>
+                <div class="px-3 py-2 border-bottom">
+                  <div class="fw-700 text-dark" style="font-size:.9rem;">{{ user.get_full_name|default:user.username }}</div>
+                  <div class="text-muted" style="font-size:.78rem;">{{ user.email }}</div>
+                </div>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{% url 'dashboard' %}">
+                  <i class="bi bi-grid text-accent"></i> Dashboard
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{% url 'create_profile' %}">
+                  <i class="bi bi-person-circle text-accent"></i> My Profile
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{% url 'recommended_jobs' %}">
+                  <i class="bi bi-stars text-accent"></i> Recommendations
+                </a>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li>
+                <form action="{% url 'logout' %}" method="post" class="px-3 py-1">
+                  {% csrf_token %}
+                  <button type="submit"
+                          class="btn btn-sm w-100 text-danger d-flex align-items-center gap-2"
+                          style="border:1px solid #fee2e2; background:#fff6f6;">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                  </button>
+                </form>
+              </li>
+            </ul>
+          </li>
+
+        {% else %}
+
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">
+              <i class="bi bi-person"></i> Login
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-accent btn-sm px-3 ms-1" href="{% url 'register' %}">
+              Get Started
+            </a>
+          </li>
+
+        {% endif %}
+
+      </ul>
+    </div><!-- /collapse -->
+  </div><!-- /container -->
+</nav>
