@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+{% load job_filters %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div style="background:var(--clr-bg);min-height:100vh;padding:2.5rem 0 4rem;">
+<div class="container">
+
+  <!-- ── Welcome header ────────────────────────────────── -->
+  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+    <div>
+      <h1 class="mb-1" style="font-size:1.75rem;">
+        Welcome back, <span style="color:var(--clr-accent);">{{ user.get_full_name|default:user.username }}</span> 👋
+      </h1>
+      <p class="text-muted mb-0" style="font-size:.9rem;">Here's what's happening with your job search today.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'create_profile' %}" class="btn btn-sm px-3" style="background:#f1f5f9;color:#0A2463;border-radius:9px;font-weight:600;">
+        <i class="bi bi-pencil me-1"></i>Edit Profile
+      </a>
+      <a href="{% url 'recommended_jobs' %}" class="btn btn-sm btn-primary px-3" style="border-radius:9px;">
+        <i class="bi bi-stars me-1"></i>View Matches
+      </a>
+    </div>
+  </div>
+
+  <!-- ── Profile completion ─────────────────────────────── -->
+  {% if completion_pct < 100 %}
+  <div class="card mb-4 border-0" style="background:linear-gradient(90deg,#0A2463,#3E92CC);border-radius:14px;">
+    <div class="card-body p-4">
+      <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div class="text-white">
+          <div class="fw-700 mb-1"><i class="bi bi-person-check me-2"></i>Profile {{ completion_pct }}% Complete</div>
+          <div style="font-size:.83rem;opacity:.85;">Complete your profile to improve your recommendation quality.</div>
+          <div class="mt-2" style="height:6px;background:rgba(255,255,255,.25);border-radius:4px;max-width:300px;">
+            <div style="height:100%;width:{{ completion_pct }}%;background:#7dd3fc;border-radius:4px;transition:width .6s;"></div>
+          </div>
+        </div>
+        <a href="{% url 'create_profile' %}" class="btn btn-sm flex-shrink-0"
+           style="background:#fff;color:#0A2463;font-weight:700;border-radius:9px;padding:.5rem 1.2rem;">
+          Complete Now <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── Quick stats ────────────────────────────────────── -->
+  <div class="row g-3 mb-4">
+
+    <div class="col-6 col-md-3">
+      <div class="card border-0 h-100" style="border-radius:14px;">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width:46px;height:46px;border-radius:12px;background:#dbeafe;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+              <i class="bi bi-stars" style="font-size:1.2rem;color:#3b82f6;"></i>
+            </div>
+            <div>
+              <div style="font-size:1.6rem;font-weight:800;color:#0A2463;line-height:1;">{{ top_recommendations|length }}</div>
+              <div style="font-size:.75rem;color:#64748B;">Matches</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="card border-0 h-100" style="border-radius:14px;">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width:46px;height:46px;border-radius:12px;background:#d1fae5;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+              <i class="bi bi-send-check" style="font-size:1.2rem;color:#10b981;"></i>
+            </div>
+            <div>
+              <div style="font-size:1.6rem;font-weight:800;color:#0A2463;line-height:1;">{{ applied_count }}</div>
+              <div style="font-size:.75rem;color:#64748B;">Applied</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="card border-0 h-100" style="border-radius:14px;">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width:46px;height:46px;border-radius:12px;background:#fef3c7;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+              <i class="bi bi-bookmark-heart" style="font-size:1.2rem;color:#f59e0b;"></i>
+            </div>
+            <div>
+              <div style="font-size:1.6rem;font-weight:800;color:#0A2463;line-height:1;">{{ saved_count }}</div>
+              <div style="font-size:.75rem;color:#64748B;">Saved</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="card border-0 h-100" style="border-radius:14px;">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width:46px;height:46px;border-radius:12px;background:#ede9fe;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+              <i class="bi bi-briefcase" style="font-size:1.2rem;color:#7c3aed;"></i>
+            </div>
+            <div>
+              <div style="font-size:1.6rem;font-weight:800;color:#0A2463;line-height:1;">{{ total_jobs }}</div>
+              <div style="font-size:.75rem;color:#64748B;">Total Jobs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /stats -->
+
+  <div class="row g-4">
+
+    <!-- ── Left column: Recommendations ──────────────────── -->
+    <div class="col-lg-7">
+      <div class="card border-0" style="border-radius:14px;">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0 fw-700"><i class="bi bi-stars text-accent me-2"></i>Top Matches</h5>
+            <a href="{% url 'recommended_jobs' %}" style="font-size:.82rem;color:var(--clr-accent);">View all</a>
+          </div>
+
+          {% if top_recommendations %}
+          <div class="d-flex flex-column gap-3">
+            {% for item in top_recommendations %}
+            <div class="d-flex align-items-center gap-3 p-3 rounded-3"
+                 style="background:#f8fafc;transition:background .2s;"
+                 onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+              <div style="width:40px;height:40px;border-radius:10px;background:{% if item.score >= 90 %}#d1fae5{% elif item.score >= 75 %}#dbeafe{% elif item.score >= 50 %}#fef3c7{% else %}#f1f5f9{% endif %};flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-briefcase" style="color:{% if item.score >= 90 %}#10b981{% elif item.score >= 75 %}#3b82f6{% elif item.score >= 50 %}#f59e0b{% else %}#94a3b8{% endif %};"></i>
+              </div>
+              <div class="flex-grow-1 min-w-0">
+                <div class="fw-600 text-truncate" style="font-size:.88rem;">{{ item.job.title }}</div>
+                <div class="text-muted" style="font-size:.76rem;">{{ item.job.company.name }} &bull; {{ item.job.location }}</div>
+              </div>
+              <div class="text-end flex-shrink-0">
+                <div class="fw-700" style="font-size:.9rem;color:{% if item.score >= 90 %}#10b981{% elif item.score >= 75 %}#3b82f6{% elif item.score >= 50 %}#f59e0b{% else %}#94a3b8{% endif %};">
+                  {{ item.score }}%
+                </div>
+                <a href="{% url 'job_detail' item.job.id %}" style="font-size:.73rem;color:var(--clr-accent);">View</a>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-center py-4">
+            <i class="bi bi-search" style="font-size:2rem;color:#cbd5e1;"></i>
+            <p class="text-muted mt-2 mb-0" style="font-size:.85rem;">No recommendations yet. Complete your profile to get matches.</p>
+            <a href="{% url 'create_profile' %}" class="btn btn-sm btn-primary mt-3" style="border-radius:9px;">Complete Profile</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Recent Applications -->
+      {% if recent_applications %}
+      <div class="card border-0 mt-4" style="border-radius:14px;">
+        <div class="card-body p-4">
+          <h5 class="mb-3 fw-700"><i class="bi bi-clock-history text-accent me-2"></i>Recent Applications</h5>
+          <div class="d-flex flex-column gap-3">
+            {% for app in recent_applications %}
+            <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background:#f8fafc;">
+              <div style="width:38px;height:38px;border-radius:9px;background:#f1f5f9;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-file-earmark-text" style="color:#64748B;"></i>
+              </div>
+              <div class="flex-grow-1 min-w-0">
+                <div class="fw-600 text-truncate" style="font-size:.87rem;">{{ app.job.title }}</div>
+                <div class="text-muted" style="font-size:.75rem;">{{ app.job.company.name }}</div>
+              </div>
+              <div class="text-end flex-shrink-0">
+                <span class="badge rounded-pill px-2" style="font-size:.7rem;
+                  {% if app.status == 'Accepted' %}background:#d1fae5;color:#065f46;
+                  {% elif app.status == 'Rejected' %}background:#fee2e2;color:#991b1b;
+                  {% elif app.status == 'Reviewed' %}background:#dbeafe;color:#1e40af;
+                  {% else %}background:#fef3c7;color:#92400e;{% endif %}">
+                  {{ app.status }}
+                </span>
+                <div class="text-muted" style="font-size:.7rem;margin-top:2px;">{{ app.applied_at|date:"M d" }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- ── Right column: Profile + Saved ─────────────────── -->
+    <div class="col-lg-5">
+
+      <!-- Profile card -->
+      <div class="card border-0 mb-4" style="border-radius:14px;">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#0A2463,#3E92CC);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;color:#fff;flex-shrink:0;">
+              {{ user.username|first|upper }}
+            </div>
+            <div>
+              <div class="fw-700" style="font-size:1rem;">{{ user.get_full_name|default:user.username }}</div>
+              <div class="text-muted" style="font-size:.78rem;">{{ user.email }}</div>
+            </div>
+          </div>
+
+          <div class="d-flex flex-column gap-2" style="font-size:.83rem;">
+            {% if profile.preferred_location %}
+            <div class="d-flex gap-2"><i class="bi bi-geo-alt text-accent"></i><span>{{ profile.preferred_location }}</span></div>
+            {% endif %}
+            {% if profile.experience %}
+            <div class="d-flex gap-2"><i class="bi bi-award text-accent"></i><span>{{ profile.experience }} year{{ profile.experience|pluralize }} experience</span></div>
+            {% endif %}
+            {% if profile.preferred_category %}
+            <div class="d-flex gap-2"><i class="bi bi-tag text-accent"></i><span>{{ profile.preferred_category }}</span></div>
+            {% endif %}
+            {% if profile.skills %}
+            <div class="d-flex gap-2 align-items-start">
+              <i class="bi bi-tools text-accent mt-1"></i>
+              <div class="d-flex flex-wrap gap-1">
+                {% for skill in profile.skills|split:"," %}
+                <span class="badge" style="background:#f1f5f9;color:#475569;font-weight:500;font-size:.7rem;border-radius:6px;">{{ skill }}</span>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          <a href="{% url 'create_profile' %}" class="btn btn-sm w-100 mt-4"
+             style="background:#f1f5f9;color:#0A2463;border-radius:9px;font-weight:600;">
+            <i class="bi bi-pencil me-1"></i>Edit Profile
+          </a>
+        </div>
+      </div>
+
+      <!-- Saved jobs -->
+      {% if saved_jobs %}
+      <div class="card border-0" style="border-radius:14px;">
+        <div class="card-body p-4">
+          <h5 class="mb-3 fw-700"><i class="bi bi-bookmark-heart text-accent me-2"></i>Saved Jobs</h5>
+          <div class="d-flex flex-column gap-3">
+            {% for saved in saved_jobs %}
+            <div class="d-flex align-items-center gap-3">
+              <div style="width:36px;height:36px;border-radius:9px;background:#fef3c7;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-bookmark-fill" style="color:#f59e0b;font-size:.85rem;"></i>
+              </div>
+              <div class="flex-grow-1 min-w-0">
+                <div class="fw-600 text-truncate" style="font-size:.85rem;">{{ saved.job.title }}</div>
+                <div class="text-muted" style="font-size:.73rem;">{{ saved.job.company.name }}</div>
+              </div>
+              <a href="{% url 'job_detail' saved.job.id %}" style="font-size:.73rem;color:var(--clr-accent);flex-shrink:0;">View</a>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div><!-- /row -->
+</div>
+</div>
+{% endblock %}
