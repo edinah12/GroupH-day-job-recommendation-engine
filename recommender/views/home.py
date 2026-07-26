@@ -44,11 +44,19 @@ def home(request):
             Q(description__icontains=search_query)
         )
         
+    recommended_jobs = []
+    try:
+        from recommender.recommendations.services import recommend_jobs
+        recommended_jobs = recommend_jobs(profile)[:4]
+    except Exception:
+        pass
+
     return render(
         request,
         "home.html",
         {
             "jobs": jobs,
+            "recommended_jobs": recommended_jobs,
             "search_query": search_query,
         },
     )

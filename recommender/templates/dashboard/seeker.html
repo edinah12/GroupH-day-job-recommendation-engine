@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}My Dashboard{% endblock %}
+{% block title %}My Applications — Job Recommendation Engine{% endblock %}
 
 {% block content %}
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h2 mb-1">Job Seeker Dashboard</h1>
-            <p class="text-muted mb-0">Track your job applications and saved jobs.</p>
+            <h1 class="h2 mb-1">My Applications</h1>
+            <p class="text-muted mb-0">Track the status of your submitted job applications.</p>
         </div>
         <a href="{% url 'home' %}" class="btn btn-outline-primary">
             🔍 Browse All Jobs
@@ -17,7 +17,7 @@
     <!-- Applications Table -->
     <div class="card border-0 shadow-sm mb-5">
         <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold">My Job Applications</h5>
+            <h5 class="mb-0 fw-bold">Submitted Job Applications</h5>
         </div>
         <div class="card-body p-0">
             {% if applications %}
@@ -75,3 +75,4 @@
     </div>
 </div>
 {% endblock %}
+

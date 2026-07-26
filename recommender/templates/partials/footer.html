@@ -1,0 +1,37 @@
+<footer class="footer-custom bg-dark text-white py-4 mt-auto">
+  <div class="container">
+    <div class="row align-items-center g-3">
+      <!-- Brand & Description -->
+      <div class="col-md-6 text-center text-md-start">
+        <div class="fw-bold fs-5 mb-1 d-flex align-items-center gap-2 justify-content-center justify-content-md-start">
+          <i class="bi bi-briefcase-fill text-primary"></i> Job Recommendation Engine
+        </div>
+        <p class="text-white-50 small mb-0">
+          Smart job recommendations matching your skills, experience, and preferences.
+        </p>
+      </div>
+
+      <!-- Simple Quick Links -->
+      <div class="col-md-6 text-center text-md-end">
+        <ul class="list-inline mb-0 small">
+          <li class="list-inline-item me-3"><a href="{% url 'home' %}" class="text-white-50 text-decoration-none hover-white">Home</a></li>
+          <li class="list-inline-item me-3"><a href="{% url 'job_list' %}" class="text-white-50 text-decoration-none hover-white">Jobs</a></li>
+          <li class="list-inline-item me-3"><a href="{% url 'company_list' %}" class="text-white-50 text-decoration-none hover-white">Companies</a></li>
+          {% if user.is_authenticated and not user.profile.is_recruiter %}
+          <li class="list-inline-item me-3"><a href="{% url 'recommended_jobs' %}" class="text-white-50 text-decoration-none hover-white">Recommendations</a></li>
+          <li class="list-inline-item"><a href="{% url 'seeker_dashboard' %}" class="text-white-50 text-decoration-none hover-white">My Applications</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+    <hr class="my-3 border-secondary border-opacity-25">
+
+    <!-- Bottom Copyright Line -->
+    <div class="text-center text-white-50 small">
+      &copy; {% now "Y" %} Job Recommendation Engine. All rights reserved.
+    </div>
+  </div>
+</footer>
+
+

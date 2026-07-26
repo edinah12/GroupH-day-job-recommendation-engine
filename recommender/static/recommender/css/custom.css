@@ -140,6 +140,12 @@ main {
   box-shadow: 0 0 0 5px rgba(13, 110, 253, 0.35) !important;
 }
 
+.form-check-input:focus-visible,
+.form-check-input:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.3) !important;
+}
+
 /* Visually Hidden Utility for Screen Readers */
 .visually-hidden-focusable:not(:focus) {
   clip: rect(0 0 0 0) !important;

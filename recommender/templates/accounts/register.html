@@ -28,10 +28,26 @@
 
                     {% for field in form %}
                     <div class="mb-3">
-                        <label class="form-label" for="{{ field.id_for_label }}">
-                            {{ field.label }}
-                        </label>
-                        {{ field }}
+                        {% if field.name == 'role' %}
+                            <label class="form-label d-block fw-semibold mb-2">
+                                {{ field.label }}
+                            </label>
+                            <div class="d-flex gap-4 align-items-center">
+                                {% for radio in field %}
+                                <div class="form-check mb-0">
+                                    {{ radio.tag }}
+                                    <label class="form-check-label ms-1" for="{{ radio.id_for_label }}">
+                                        {{ radio.choice_label }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <label class="form-label" for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                        {% endif %}
                         {% if field.help_text %}
                         <div class="form-text mt-1">{{ field.help_text }}</div>
                         {% endif %}

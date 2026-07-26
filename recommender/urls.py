@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import include, path
 from django.contrib.auth import views as auth_views
 
 from .views.home import home
@@ -22,8 +22,10 @@ urlpatterns = [
     path("dashboard/", dashboard, name="dashboard"),
     path("recruiter/dashboard/", recruiter_dashboard, name="recruiter_dashboard"),
     path("recruiter/jobs/", recruiter_jobs, name="recruiter_jobs"),
-    path("seeker/dashboard/", seeker_dashboard, name="seeker_dashboard"),
+    path("my-applications/", seeker_dashboard, name="seeker_dashboard"),
     
+    path("recommendations/", include("recommender.recommendations.urls")),
+
     path("register/", register, name="register"),
     path("login/", CustomLoginView.as_view(), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),

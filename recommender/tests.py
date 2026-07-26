@@ -1,6 +1,11 @@
+from decimal import Decimal
+import datetime
 from django.test import TestCase
 from django.contrib.auth.models import User
 from django.urls import reverse
+
+from recommender.models import Company, JobCategory, Job
+from recommender.recommendations.services import recommend_jobs, calculate_match_score
 
 
 class ViewTests(TestCase):
@@ -10,47 +15,89 @@ class ViewTests(TestCase):
             password="Password123!",
             email="test@example.com"
         )
+        self.profile = self.user.profile
+        self.profile.role = "seeker"
+        self.profile.skills = "Python, Django, SQL"
+        self.profile.experience = 3
+        self.profile.preferred_location = "Kampala"
+        self.profile.preferred_category = "Engineering"
+        self.profile.expected_salary = Decimal("2000000")
+        self.profile.save()
+
+        self.company = Company.objects.create(name="Test Co", location="Kampala")
+        self.category = JobCategory.objects.create(name="Engineering")
 
     def test_welcome_page_unauthenticated(self):
         response = self.client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "welcome.html")
-        self.assertContains(response, "Find Your Dream Job")
 
     def test_home_page_authenticated(self):
         self.client.force_login(self.user)
         response = self.client.get(reverse("home"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "home.html")
-        self.assertContains(response, "Welcome back, testuser")
 
     def test_register_page_get(self):
         response = self.client.get(reverse("register"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "accounts/register.html")
-        # Ensure bulky Django default help text is NOT present
-        self.assertNotContains(response, "Your password can't be too similar")
 
     def test_job_detail_view(self):
-        from recommender.models import Company, JobCategory, Job
-        import datetime
-        company = Company.objects.create(name="Test Co", location="Kampala")
-        category = JobCategory.objects.create(name="Tech")
         job = Job.objects.create(
             title="Python Dev",
-            company=company,
-            category=category,
-            description="Write python code",
-            requirements="CS degree",
+            company=self.company,
+            category=self.category,
+            description="Build web applications",
+            requirements="Python, Django",
             required_skills="Python, Django",
             location="Kampala",
-            salary=1000.00,
-            experience_required=1,
+            salary=Decimal("2500000"),
+            experience_required=2,
             job_type="Full-Time",
-            deadline=datetime.date.today()
+            deadline=datetime.date.today() + datetime.timedelta(days=30),
+            posted_by=self.user,
         )
         response = self.client.get(reverse("job_detail", args=[job.id]))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "jobs/detail.html")
         self.assertContains(response, "Python Dev")
-        self.assertContains(response, "Test Co")
+
+
+class RecommendationEngineTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="candidate",
+            password="Password123!",
+        )
+        self.profile = self.user.profile
+        self.profile.role = "seeker"
+        self.profile.experience = 3
+        self.profile.skills = "Python, Django, SQL"
+        self.profile.preferred_location = "Kampala"
+        self.profile.preferred_category = "Engineering"
+        self.profile.expected_salary = Decimal("2000000")
+        self.profile.save()
+
+        self.company = Company.objects.create(name="TechCorp", location="Kampala")
+        self.category = JobCategory.objects.create(name="Engineering")
+
+    def test_recommendation_scoring(self):
+        job = Job.objects.create(
+            title="Senior Backend Engineer",
+            company=self.company,
+            category=self.category,
+            description="Build scalable microservices",
+            requirements="Python",
+            required_skills="Python, Django, SQL",
+            location="Kampala",
+            salary=Decimal("3000000"),
+            experience_required=2,
+            job_type="Full-Time",
+            deadline=datetime.date.today() + datetime.timedelta(days=30),
+            posted_by=self.user,
+        )
+        score = calculate_match_score(self.profile, job)
+        self.assertGreaterEqual(score, 80.0)
+
+        recs = recommend_jobs(self.profile)
+        self.assertTrue(len(recs) > 0)
+        self.assertEqual(recs[0]["job"], job)

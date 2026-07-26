@@ -32,7 +32,7 @@ class UserRegistrationForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ("username", "email", "role", "password1", "password2")
+        fields = ("username", "email")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -49,7 +49,9 @@ class UserRegistrationForm(UserCreationForm):
         self.fields["password1"].help_text = "Must be at least 8 characters long."
         self.fields["password2"].help_text = ""
         
-        for field in self.fields.values():
+        for name, field in self.fields.items():
+            if isinstance(field.widget, (forms.RadioSelect, forms.CheckboxInput)):
+                continue
             css = field.widget.attrs.get("class", "")
             field.widget.attrs["class"] = f"{css} form-control".strip()
 

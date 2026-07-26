@@ -44,6 +44,11 @@ class Profile(models.Model):
         blank=True,
     )
 
+    preferred_category = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+
     expected_salary = models.DecimalField(
         max_digits=10,
         decimal_places=2,

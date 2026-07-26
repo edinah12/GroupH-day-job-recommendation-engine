@@ -53,11 +53,20 @@ def seeker_dashboard(request):
     applications = Application.objects.filter(user=request.user).order_by("-applied_at")
     saved_jobs = SavedJob.objects.filter(user=request.user).order_by("-saved_at")
 
+    top_recommendations = []
+    try:
+        profile = get_user_profile(request.user)
+        from recommender.recommendations.services import recommend_jobs
+        top_recommendations = recommend_jobs(profile)[:5]
+    except Exception:
+        pass
+
     return render(
         request,
         "dashboard/seeker.html",
         {
             "applications": applications,
             "saved_jobs": saved_jobs,
+            "top_recommendations": top_recommendations,
         },
     )
