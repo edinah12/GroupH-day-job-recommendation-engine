@@ -1,237 +1,61 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign In — JobMatch</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
-  <style>
-    :root {
-      --clr-primary: #0A2463;
-      --clr-accent:  #3E92CC;
-    }
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Inter', sans-serif;
-      margin: 0; height: 100vh;
-      display: flex; overflow: hidden;
-    }
+{% extends "base.html" %}
 
-    /* ── Left panel ── */
-    .auth-panel-left {
-      width: 45%;
-      background: linear-gradient(145deg, #0A2463 0%, #1a3a7c 50%, #3E92CC 100%);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 3rem; color: #fff; position: relative; overflow: hidden;
-    }
-    .auth-panel-left::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    }
-    .auth-panel-left .brand {
-      font-size: 1.5rem; font-weight: 800; margin-bottom: 2rem;
-      display: flex; align-items: center; gap: .6rem;
-    }
-    .auth-panel-left .brand-dot {
-      width: 38px; height: 38px; border-radius: 10px;
-      background: rgba(255,255,255,.2); display: flex;
-      align-items: center; justify-content: center; font-size: 1.1rem;
-    }
-    .auth-panel-left h2 { font-size: 2rem; font-weight: 800; margin-bottom: 1rem; line-height: 1.2; }
-    .auth-panel-left p  { font-size: .95rem; opacity: .82; max-width: 320px; line-height: 1.6; }
-    .feature-list { list-style: none; padding: 0; margin-top: 2rem; }
-    .feature-list li {
-      display: flex; align-items: center; gap: .7rem;
-      margin-bottom: .8rem; font-size: .88rem; opacity: .9;
-    }
-    .feature-list li i { font-size: 1rem; color: #7dd3fc; }
+{% block title %}Login{% endblock %}
 
-    /* ── Right panel ── */
-    .auth-panel-right {
-      flex: 1; overflow-y: auto;
-      display: flex; align-items: center; justify-content: center;
-      background: #F4F7FE; padding: 2rem;
-    }
-    .auth-card {
-      background: #fff; border-radius: 18px;
-      box-shadow: 0 8px 32px rgba(10,36,99,.10);
-      padding: 2.5rem 2.2rem; width: 100%; max-width: 440px;
-    }
-    .auth-card h3 { font-size: 1.5rem; font-weight: 800; color: #1A1A2E; }
-    .auth-card .sub { font-size: .88rem; color: #64748B; margin-bottom: 1.8rem; }
+{% block content %}
 
-    .form-label { font-weight: 600; font-size: .82rem; color: #1A1A2E; margin-bottom: .3rem; }
-    .form-control {
-      border-radius: 9px; border: 1.5px solid #E2E8F0;
-      font-size: .9rem; padding: .65rem 1rem;
-      transition: border-color .2s, box-shadow .2s;
-    }
-    .form-control:focus {
-      border-color: var(--clr-accent);
-      box-shadow: 0 0 0 3px rgba(62,146,204,.15);
-    }
-    .input-group .form-control { border-right: 0; }
-    .input-group .btn-eye {
-      border: 1.5px solid #E2E8F0; border-left: 0;
-      background: #fff; border-radius: 0 9px 9px 0;
-      padding: 0 .9rem; color: #64748B;
-      transition: color .2s;
-    }
-    .input-group .btn-eye:hover { color: var(--clr-primary); }
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
 
-    .btn-signin {
-      background: var(--clr-primary); color: #fff;
-      border: none; border-radius: 9px;
-      font-weight: 700; padding: .75rem; font-size: .95rem;
-      transition: background .2s, transform .15s, box-shadow .2s;
-    }
-    .btn-signin:hover {
-      background: #1a3a7c; color: #fff;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(10,36,99,.25);
-    }
-    .btn-signin:disabled { opacity: .65; }
-    .divider { text-align: center; color: #94a3b8; font-size: .8rem; position: relative; margin: 1.2rem 0; }
-    .divider::before, .divider::after {
-      content: ''; position: absolute; top: 50%; width: calc(50% - 24px);
-      height: 1px; background: #E2E8F0;
-    }
-    .divider::before { left: 0; }
-    .divider::after  { right: 0; }
-    .errorlist { list-style: none; padding: 0; }
-    .errorlist li { font-size: .82rem; color: #dc2626; margin-top: .25rem; display: flex; align-items: center; gap: .35rem; }
-    .errorlist li::before { content: '\F622'; font-family: 'bootstrap-icons'; }
+            <div class="card card-auth p-4 p-sm-5">
+                <div class="text-center mb-4">
+                    <div class="icon-box bg-primary-subtle text-primary mb-3 mx-auto">
+                        <i class="bi bi-box-arrow-in-right fs-3"></i>
+                    </div>
+                    <h1 class="h3 fw-bold mb-1">Welcome Back</h1>
+                    <p class="text-muted small">Sign in to manage your profile and applications.</p>
+                </div>
 
-    /* Mobile: stack panels */
-    @media (max-width: 767px) {
-      body { flex-direction: column; height: auto; overflow: auto; }
-      .auth-panel-left { width: 100%; padding: 2rem; min-height: 200px; }
-      .auth-panel-left h2 { font-size: 1.4rem; }
-      .feature-list { display: none; }
-      .auth-panel-right { padding: 1.5rem; align-items: flex-start; }
-    }
-  </style>
-</head>
-<body>
+                <form method="post" novalidate>
+                    {% csrf_token %}
 
-  <!-- ── Left illustration panel ── -->
-  <div class="auth-panel-left">
-    <div class="brand">
-      <span class="brand-dot"><i class="bi bi-briefcase-fill"></i></span>
-      JobMatch
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger p-2 small mb-3">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label" for="{{ field.id_for_label }}">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% for error in field.errors %}
+                                <div class="invalid-feedback d-block small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill mt-2 fw-semibold">
+                        Sign In
+                    </button>
+                </form>
+
+                <div class="text-center mt-4 pt-3 border-top">
+                    <p class="small mb-2">
+                        <a href="{% url 'password_reset' %}" class="text-muted text-decoration-none">Forgot password?</a>
+                    </p>
+                    <p class="small text-muted mb-0">
+                        Don't have an account?
+                        <a href="{% url 'register' %}" class="fw-semibold text-primary text-decoration-none ms-1">Create one</a>
+                    </p>
+                </div>
+            </div>
+
+        </div>
     </div>
-    <h2>Welcome back.<br/>Your next opportunity awaits.</h2>
-    <p>Sign in to access your personalised job recommendations, track applications and manage your profile.</p>
-    <ul class="feature-list">
-      <li><i class="bi bi-stars"></i> AI-powered job recommendations</li>
-      <li><i class="bi bi-shield-check"></i> Secure &amp; private</li>
-      <li><i class="bi bi-graph-up-arrow"></i> Track your applications</li>
-      <li><i class="bi bi-bell"></i> Real-time match scores</li>
-    </ul>
-  </div>
+</div>
 
-  <!-- ── Right form panel ── -->
-  <div class="auth-panel-right">
-    <div class="auth-card">
-      <h3>Sign in</h3>
-      <p class="sub">Don't have an account? <a href="{% url 'register' %}" class="fw-600" style="color:var(--clr-accent);">Create one free</a></p>
-
-      <form method="post" id="loginForm" novalidate>
-        {% csrf_token %}
-
-        <!-- Non-field errors -->
-        {% if form.non_field_errors %}
-        <div class="alert d-flex align-items-center gap-2 mb-3"
-             style="background:#fee2e2;color:#991b1b;border-radius:10px;font-size:.85rem;">
-          <i class="bi bi-exclamation-circle-fill"></i>
-          <span>{{ form.non_field_errors|join:", " }}</span>
-        </div>
-        {% endif %}
-
-        <!-- Username -->
-        <div class="mb-3">
-          <label class="form-label" for="id_username">Username</label>
-          <input type="text" name="username" id="id_username" autocomplete="username"
-                 class="form-control {% if form.username.errors %}is-invalid{% endif %}"
-                 value="{{ form.username.value|default:'' }}"
-                 placeholder="Enter your username" required />
-          {% if form.username.errors %}
-            <ul class="errorlist">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-          {% endif %}
-        </div>
-
-        <!-- Password -->
-        <div class="mb-3">
-          <div class="d-flex justify-content-between align-items-center">
-            <label class="form-label mb-0" for="id_password">Password</label>
-            <a href="#" style="font-size:.78rem;color:var(--clr-accent);">Forgot password?</a>
-          </div>
-          <div class="input-group mt-1">
-            <input type="password" name="password" id="id_password" autocomplete="current-password"
-                   class="form-control {% if form.password.errors %}is-invalid{% endif %}"
-                   placeholder="Enter your password" required />
-            <button type="button" class="btn-eye" id="togglePwd" aria-label="Show/hide password">
-              <i class="bi bi-eye" id="eyeIcon"></i>
-            </button>
-          </div>
-          {% if form.password.errors %}
-            <ul class="errorlist">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>
-          {% endif %}
-        </div>
-
-        <!-- Remember me -->
-        <div class="mb-4 form-check">
-          <input class="form-check-input" type="checkbox" id="rememberMe" name="remember_me" />
-          <label class="form-check-label" for="rememberMe" style="font-size:.85rem;color:#475569;">
-            Remember me for 30 days
-          </label>
-        </div>
-
-        <!-- Submit -->
-        <button type="submit" class="btn btn-signin w-100" id="submitBtn">
-          <span id="btnText"><i class="bi bi-box-arrow-in-right me-1"></i> Sign In</span>
-          <span id="btnSpinner" class="d-none">
-            <span class="spinner-border spinner-border-sm me-1" role="status"></span> Signing in…
-          </span>
-        </button>
-
-      </form>
-
-      <div class="divider mt-4">or</div>
-
-      <p class="text-center mb-0" style="font-size:.85rem;color:#64748B;">
-        New here?
-        <a href="{% url 'register' %}" class="fw-600" style="color:var(--clr-primary);">Create a free account</a>
-      </p>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Show/hide password
-    document.getElementById('togglePwd').addEventListener('click', () => {
-      const pwd = document.getElementById('id_password');
-      const icon = document.getElementById('eyeIcon');
-      if (pwd.type === 'password') {
-        pwd.type = 'text';
-        icon.classList.replace('bi-eye', 'bi-eye-slash');
-      } else {
-        pwd.type = 'password';
-        icon.classList.replace('bi-eye-slash', 'bi-eye');
-      }
-    });
-
-    // Loading state on submit
-    document.getElementById('loginForm').addEventListener('submit', () => {
-      document.getElementById('btnText').classList.add('d-none');
-      document.getElementById('btnSpinner').classList.remove('d-none');
-      document.getElementById('submitBtn').disabled = true;
-    });
-  </script>
-</body>
-</html>
+{% endblock %}

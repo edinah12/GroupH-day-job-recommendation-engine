@@ -1,73 +1,37 @@
-<footer class="app-footer">
+<footer class="footer-custom bg-dark text-white py-4 mt-auto">
   <div class="container">
-    <div class="row g-4">
-
-      <!-- Brand column -->
-      <div class="col-lg-4">
-        <div class="footer-brand d-flex align-items-center gap-2 mb-2">
-          <span style="background:var(--clr-accent);width:30px;height:30px;border-radius:8px;
-                       display:flex;align-items:center;justify-content:center;">
-            <i class="bi bi-briefcase-fill text-white"></i>
-          </span>
-          JobMatch
+    <div class="row align-items-center g-3">
+      <!-- Brand & Description -->
+      <div class="col-md-6 text-center text-md-start">
+        <div class="fw-bold fs-5 mb-1 d-flex align-items-center gap-2 justify-content-center justify-content-md-start">
+          <i class="bi bi-briefcase-fill text-primary"></i> Job Recommendation Engine
         </div>
-        <p style="font-size:.85rem;max-width:280px;">
-          A smart job recommendation engine that matches you to the right opportunities
-          based on your skills, experience and preferences.
+        <p class="text-white-50 small mb-0">
+          Smart job recommendations matching your skills, experience, and preferences.
         </p>
-        <div class="d-flex gap-2 mt-3">
-          <a href="#" class="btn btn-sm" style="background:rgba(255,255,255,.1);color:#fff;border-radius:8px;">
-            <i class="bi bi-twitter-x"></i>
-          </a>
-          <a href="#" class="btn btn-sm" style="background:rgba(255,255,255,.1);color:#fff;border-radius:8px;">
-            <i class="bi bi-linkedin"></i>
-          </a>
-          <a href="#" class="btn btn-sm" style="background:rgba(255,255,255,.1);color:#fff;border-radius:8px;">
-            <i class="bi bi-github"></i>
-          </a>
-        </div>
       </div>
 
-      <!-- Links -->
-      <div class="col-6 col-lg-2 offset-lg-2">
-        <h6 class="text-white mb-3" style="font-size:.8rem;letter-spacing:.8px;text-transform:uppercase;">Platform</h6>
-        <ul class="list-unstyled" style="font-size:.85rem;">
-          <li class="mb-2"><a href="{% url 'home' %}">Home</a></li>
-          <li class="mb-2"><a href="{% url 'recommended_jobs' %}">Recommendations</a></li>
-          {% if user.is_authenticated %}
-          <li class="mb-2"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+      <!-- Simple Quick Links -->
+      <div class="col-md-6 text-center text-md-end">
+        <ul class="list-inline mb-0 small">
+          <li class="list-inline-item me-3"><a href="{% url 'home' %}" class="text-white-50 text-decoration-none hover-white">Home</a></li>
+          <li class="list-inline-item me-3"><a href="{% url 'job_list' %}" class="text-white-50 text-decoration-none hover-white">Jobs</a></li>
+          <li class="list-inline-item me-3"><a href="{% url 'company_list' %}" class="text-white-50 text-decoration-none hover-white">Companies</a></li>
+          {% if user.is_authenticated and not user.profile.is_recruiter %}
+          <li class="list-inline-item me-3"><a href="{% url 'recommended_jobs' %}" class="text-white-50 text-decoration-none hover-white">Recommendations</a></li>
+          <li class="list-inline-item"><a href="{% url 'seeker_dashboard' %}" class="text-white-50 text-decoration-none hover-white">My Applications</a></li>
           {% endif %}
         </ul>
       </div>
-
-      <div class="col-6 col-lg-2">
-        <h6 class="text-white mb-3" style="font-size:.8rem;letter-spacing:.8px;text-transform:uppercase;">Account</h6>
-        <ul class="list-unstyled" style="font-size:.85rem;">
-          {% if user.is_authenticated %}
-          <li class="mb-2"><a href="{% url 'create_profile' %}">My Profile</a></li>
-          <li class="mb-2">
-            <form action="{% url 'logout' %}" method="post" class="d-inline">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-link p-0 text-decoration-none"
-                      style="color:rgba(255,255,255,.7);font-size:.85rem;">Sign Out</button>
-            </form>
-          </li>
-          {% else %}
-          <li class="mb-2"><a href="{% url 'login' %}">Login</a></li>
-          <li class="mb-2"><a href="{% url 'register' %}">Register</a></li>
-          {% endif %}
-        </ul>
-      </div>
-
     </div>
 
-    <hr class="footer-divider" />
+    <hr class="my-3 border-secondary border-opacity-25">
 
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2"
-         style="font-size:.8rem;">
-      <span>&copy; {% now "Y" %} JobMatch — Group H. All rights reserved.</span>
-      <span>Built with <i class="bi bi-heart-fill text-danger"></i> using Django &amp; Bootstrap 5</span>
+    <!-- Bottom Copyright Line -->
+    <div class="text-center text-white-50 small">
+      &copy; {% now "Y" %} Job Recommendation Engine. All rights reserved.
     </div>
-
   </div>
 </footer>
+
+

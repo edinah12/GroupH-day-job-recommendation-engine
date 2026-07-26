@@ -1,306 +1,146 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="{% block meta_description %}Find your perfect job with AI-powered recommendations tailored to your skills and experience.{% endblock %}" />
-  <title>{% block title %}JobMatch{% endblock %} — Job Recommendation Engine</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Job Recommendation Engine{% endblock %}</title>
 
-  <!-- Google Fonts: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-
-  <!-- Bootstrap 5.3 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-
-  <!-- Bootstrap Icons 1.11 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
-
-  <style>
-    /* ── Design tokens ──────────────────────────────────────── */
-    :root {
-      --clr-primary:      #0A2463;
-      --clr-primary-lt:   #1a3a7c;
-      --clr-accent:       #3E92CC;
-      --clr-accent-lt:    #60aade;
-      --clr-success:      #2DC653;
-      --clr-warning:      #F4A261;
-      --clr-danger:       #E63946;
-      --clr-bg:           #F4F7FE;
-      --clr-surface:      #FFFFFF;
-      --clr-text:         #1A1A2E;
-      --clr-text-muted:   #64748B;
-      --clr-border:       #E2E8F0;
-      --radius-card:      14px;
-      --radius-btn:       8px;
-      --radius-pill:      50px;
-      --shadow-sm:        0 2px 8px rgba(10,36,99,.07);
-      --shadow-md:        0 8px 24px rgba(10,36,99,.10);
-      --shadow-lg:        0 20px 48px rgba(10,36,99,.13);
-      --transition:       0.2s ease;
-    }
-
-    /* ── Global reset & typography ──────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; }
-
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background-color: var(--clr-bg);
-      color: var(--clr-text);
-      font-size: 0.9375rem;
-      line-height: 1.65;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    main { flex: 1; }
-
-    h1, h2, h3, h4, h5, h6 {
-      font-weight: 700;
-      line-height: 1.25;
-      color: var(--clr-text);
-    }
-
-    a { color: var(--clr-accent); transition: color var(--transition); }
-    a:hover { color: var(--clr-primary); }
-
-    /* ── Sticky navbar ──────────────────────────────────────── */
-    .app-navbar {
-      background: var(--clr-primary) !important;
-      box-shadow: 0 2px 12px rgba(10,36,99,.18);
-      position: sticky;
-      top: 0;
-      z-index: 1030;
-      padding: 0.65rem 0;
-    }
-
-    .app-navbar .navbar-brand {
-      font-weight: 800;
-      font-size: 1.2rem;
-      color: #fff !important;
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-      letter-spacing: -0.3px;
-    }
-
-    .app-navbar .navbar-brand .brand-icon {
-      background: var(--clr-accent);
-      color: #fff;
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-    }
-
-    .app-navbar .nav-link {
-      color: rgba(255,255,255,.82) !important;
-      font-weight: 500;
-      font-size: 0.875rem;
-      padding: 0.45rem 0.85rem !important;
-      border-radius: 7px;
-      transition: background var(--transition), color var(--transition);
-    }
-
-    .app-navbar .nav-link:hover,
-    .app-navbar .nav-link.active {
-      background: rgba(255,255,255,.12);
-      color: #fff !important;
-    }
-
-    .app-navbar .nav-link i { margin-right: 4px; }
-
-    /* avatar pill */
-    .nav-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--clr-accent);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 0.8rem;
-      flex-shrink: 0;
-    }
-
-    .navbar-toggler { border-color: rgba(255,255,255,.3); }
-    .navbar-toggler-icon { filter: invert(1); }
-
-    /* ── Cards ──────────────────────────────────────────────── */
-    .card {
-      border: 1px solid var(--clr-border);
-      border-radius: var(--radius-card);
-      box-shadow: var(--shadow-sm);
-      background: var(--clr-surface);
-      transition: transform var(--transition), box-shadow var(--transition);
-    }
-
-    .card-hover:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-md);
-    }
-
-    /* ── Buttons ────────────────────────────────────────────── */
-    .btn {
-      font-weight: 600;
-      border-radius: var(--radius-btn);
-      transition: all var(--transition);
-      font-size: 0.875rem;
-    }
-
-    .btn-primary {
-      background: var(--clr-primary);
-      border-color: var(--clr-primary);
-    }
-    .btn-primary:hover {
-      background: var(--clr-primary-lt);
-      border-color: var(--clr-primary-lt);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(10,36,99,.25);
-    }
-
-    .btn-accent {
-      background: var(--clr-accent);
-      border-color: var(--clr-accent);
-      color: #fff;
-    }
-    .btn-accent:hover {
-      background: var(--clr-accent-lt);
-      border-color: var(--clr-accent-lt);
-      color: #fff;
-      transform: translateY(-1px);
-    }
-
-    .btn-outline-primary {
-      border-color: var(--clr-primary);
-      color: var(--clr-primary);
-    }
-    .btn-outline-primary:hover {
-      background: var(--clr-primary);
-      color: #fff;
-      transform: translateY(-1px);
-    }
-
-    /* ── Form controls ──────────────────────────────────────── */
-    .form-control, .form-select {
-      border-radius: var(--radius-btn);
-      border-color: var(--clr-border);
-      font-size: 0.9rem;
-      padding: 0.6rem 0.9rem;
-      transition: border-color var(--transition), box-shadow var(--transition);
-    }
-
-    .form-control:focus, .form-select:focus {
-      border-color: var(--clr-accent);
-      box-shadow: 0 0 0 3px rgba(62,146,204,.18);
-    }
-
-    .form-label {
-      font-weight: 600;
-      font-size: 0.85rem;
-      color: var(--clr-text);
-      margin-bottom: 0.35rem;
-    }
-
-    /* ── Badges ─────────────────────────────────────────────── */
-    .badge { font-weight: 600; letter-spacing: 0.2px; }
-
-    /* ── Job-type pill colours ──────────────────────────────── */
-    .pill-fulltime  { background:#dbeafe; color:#1e40af; }
-    .pill-parttime  { background:#fef3c7; color:#92400e; }
-    .pill-remote    { background:#d1fae5; color:#065f46; }
-    .pill-contract  { background:#ede9fe; color:#5b21b6; }
-    .pill-internship{ background:#fee2e2; color:#991b1b; }
-
-    /* ── Section headings ───────────────────────────────────── */
-    .section-label {
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      color: var(--clr-accent);
-      margin-bottom: 0.35rem;
-    }
-
-    /* ── Alerts ─────────────────────────────────────────────── */
-    .alert { border-radius: var(--radius-card); border: none; font-size: 0.88rem; }
-    .alert-success { background:#d1fae5; color:#065f46; }
-    .alert-danger  { background:#fee2e2; color:#991b1b; }
-    .alert-info    { background:#dbeafe; color:#1e40af; }
-    .alert-warning { background:#fef3c7; color:#92400e; }
-
-    /* ── Footer ─────────────────────────────────────────────── */
-    .app-footer {
-      background: var(--clr-primary);
-      color: rgba(255,255,255,.7);
-      padding: 2.5rem 0 1.5rem;
-      margin-top: auto;
-    }
-
-    .app-footer a { color: rgba(255,255,255,.7); text-decoration: none; }
-    .app-footer a:hover { color: #fff; }
-    .app-footer .footer-brand { font-weight: 800; color: #fff; font-size: 1.1rem; }
-    .app-footer .footer-divider { border-color: rgba(255,255,255,.12); margin: 1.5rem 0 1rem; }
-
-    /* ── Toast container ────────────────────────────────────── */
-    .toast-container { z-index: 1090; }
-
-    /* ── Utility ────────────────────────────────────────────── */
-    .text-primary { color: var(--clr-primary) !important; }
-    .text-accent  { color: var(--clr-accent)  !important; }
-    .text-muted   { color: var(--clr-text-muted) !important; }
-    .bg-primary   { background: var(--clr-primary) !important; }
-    .bg-surface   { background: var(--clr-surface) !important; }
-    .bg-app       { background: var(--clr-bg) !important; }
-    .rounded-card { border-radius: var(--radius-card) !important; }
-    .shadow-card  { box-shadow: var(--shadow-md) !important; }
-
-    /* ── Scrollbar ──────────────────────────────────────────── */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: var(--clr-bg); }
-    ::-webkit-scrollbar-thumb { background: var(--clr-border); border-radius: 4px; }
-
-    /* ── Extra block for page-level overrides ───────────────── */
-    {% block extra_css %}{% endblock %}
-  </style>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'recommender/css/custom.css' %}">
 </head>
 
 <body>
 
-  <!-- ── Navbar ───────────────────────────────────────────────── -->
-  {% include "partials/navbar.html" %}
+    <!-- Skip to main content link for screen reader and keyboard accessibility -->
+    <a href="#main-content"
+        class="visually-hidden-focusable bg-primary text-white p-2 position-absolute start-0 top-0 z-3 m-2 rounded">Skip
+        to main content</a>
 
-  <!-- ── Django messages → toasts ─────────────────────────────── -->
-  {% include "partials/messages.html" %}
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark navbar-custom bg-primary shadow-sm" role="navigation"
+            aria-label="Main Navigation">
+            <div class="container">
+                <a class="navbar-brand fw-bold" href="{% if user.is_authenticated and user.profile.is_recruiter %}{% url 'recruiter_dashboard' %}{% else %}{% url 'home' %}{% endif %}">
+                    Job Recommendation Engine
+                </a>
 
-  <!-- ── Page content ─────────────────────────────────────────── -->
-  <main>
-    {% block content %}{% endblock %}
-  </main>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-  <!-- ── Footer ───────────────────────────────────────────────── -->
-  {% include "partials/footer.html" %}
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto align-items-lg-center">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% if user.is_authenticated and user.profile.is_recruiter %}{% url 'recruiter_dashboard' %}{% else %}{% url 'home' %}{% endif %}">
+                                Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            {% if user.is_authenticated and user.profile.is_recruiter %}
+                            <a class="nav-link" href="{% url 'recruiter_jobs' %}">
+                                Jobs
+                            </a>
+                            {% else %}
+                            <a class="nav-link" href="{% url 'job_list' %}">
+                                Jobs
+                            </a>
+                            {% endif %}
+                        </li>
+                        {% if not user.is_authenticated or not user.profile.is_recruiter %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'company_list' %}">
+                                Companies
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'recommended_jobs' %}">
+                                Recommendations
+                            </a>
+                        </li>
+                        {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'seeker_dashboard' %}">
+                                My Applications
+                            </a>
+                        </li>
+                        {% endif %}
+                        {% endif %}
+                        {% if user.is_authenticated and user.profile.is_recruiter %}
+                        <li class="nav-item ms-lg-2 my-2 my-lg-0">
+                            <a class="btn btn-light btn-sm text-primary fw-semibold rounded-pill px-3" href="{% url 'create_job' %}">
+                                <i class="bi bi-plus-lg me-1"></i> Post a Job
+                            </a>
+                        </li>
+                        {% endif %}
 
-  <!-- ── Bootstrap JS ─────────────────────────────────────────── -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+                        {% if user.is_authenticated %}
+                        <li class="nav-item dropdown ms-lg-2">
+                            <a class="nav-link dropdown-toggle btn btn-sm btn-outline-light text-white px-3 py-1 bg-white bg-opacity-10 border-0 rounded-pill"
+                                href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-fill me-1"></i> {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                                <li><a class="dropdown-item" href="{% url 'view_profile' %}"><i
+                                            class="bi bi-person me-2"></i> Profile</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <form action="{% url 'logout' %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="bi bi-box-arrow-right me-2"></i> Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">
+                                Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">
+                                Register
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-  <!-- ── Toast auto-show ──────────────────────────────────────── -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.toast').forEach(el => {
-        new bootstrap.Toast(el, { delay: 4500 }).show();
-      });
-    });
-  </script>
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
-  {% block extra_js %}{% endblock %}
+    <main id="main-content" tabindex="-1">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% include "partials/footer.html" %}
+
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
+
 </html>

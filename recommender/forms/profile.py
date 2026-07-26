@@ -29,7 +29,6 @@ class ProfileForm(forms.ModelForm):
             "experience",
             "skills",
             "preferred_location",
-            "preferred_category",
             "expected_salary",
             "resume",
             "profile_picture",

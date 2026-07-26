@@ -76,7 +76,11 @@ def calculate_skill_score(profile: Profile, job: Job) -> float:
     if not job_skills:
         return 0.0
 
-    matched: int = len(user_skills.intersection(job_skills))
+    matched = 0
+    for j_skill in job_skills:
+        if any(u_skill == j_skill or u_skill in j_skill or j_skill in u_skill for u_skill in user_skills):
+            matched += 1
+
     return round((matched / len(job_skills)) * SKILL_WEIGHT, 2)
 
 
@@ -97,14 +101,15 @@ def calculate_location_score(profile: Profile, job: Job) -> float:
     """
     Calculate the location-based match score (max 10 points).
 
-    Binary rule:
-        exact match (case/whitespace insensitive) -> 10 pts
-        otherwise                                 ->  0 pts
+    Matches exact or partial location strings (case/whitespace insensitive).
     """
     if not profile.preferred_location or not job.location:
         return 0.0
 
-    if _normalize(profile.preferred_location) == _normalize(job.location):
+    p_loc = _normalize(profile.preferred_location)
+    j_loc = _normalize(job.location)
+
+    if p_loc == j_loc or p_loc in j_loc or j_loc in p_loc:
         return LOCATION_WEIGHT
     return 0.0
 
@@ -113,14 +118,15 @@ def calculate_category_score(profile: Profile, job: Job) -> float:
     """
     Calculate the category-based match score (max 10 points).
 
-    Binary rule:
-        exact match (case/whitespace insensitive) -> 10 pts
-        otherwise                                 ->  0 pts
+    Matches exact or partial category names (case/whitespace insensitive).
     """
     if not profile.preferred_category or not job.category:
         return 0.0
 
-    if _normalize(profile.preferred_category) == _normalize(job.category.name):
+    p_cat = _normalize(profile.preferred_category)
+    j_cat = _normalize(job.category.name)
+
+    if p_cat == j_cat or p_cat in j_cat or j_cat in p_cat:
         return CATEGORY_WEIGHT
     return 0.0
 
@@ -178,42 +184,29 @@ def recommend_jobs(
     Return a sorted list of job recommendations for a given user profile.
 
     Only jobs whose deadline has not passed are considered (active jobs).
-    Jobs scoring below ``threshold`` are excluded.
+    Jobs scoring below ``threshold`` are excluded. If no jobs match at high threshold,
+    fall back to a lower threshold so candidates receive options.
 
     Uses select_related to avoid N+1 queries on company and category lookups.
-
-    Args:
-        profile:   The authenticated user's Profile instance.
-        threshold: Minimum match score (0–100) required for inclusion.
-                   Defaults to 40.0.
-
-    Returns:
-        A list of dicts sorted by score descending, each with the shape::
-
-            [
-                {"job": <Job instance>, "score": <float>},
-                ...
-            ]
     """
     today = timezone.localdate()
 
-    active_jobs = (
+    active_jobs = list(
         Job.objects
         .select_related("company", "category")
         .filter(deadline__gte=today)
     )
 
-    recommendations: list[dict[str, Any]] = []
+    scored_jobs = [
+        {"job": job, "score": calculate_match_score(profile, job)}
+        for job in active_jobs
+    ]
 
-    for job in active_jobs:
-        score: float = calculate_match_score(profile, job)
+    filtered = [item for item in scored_jobs if item["score"] >= threshold]
 
-        if score < threshold:
-            continue
+    # Fallback to lower threshold if strict threshold returns empty results
+    if not filtered and scored_jobs:
+        filtered = [item for item in scored_jobs if item["score"] > 0]
 
-        recommendations.append({
-            "job": job,
-            "score": score,
-        })
+    return sorted(filtered, key=lambda item: item["score"], reverse=True)
 
-    return sorted(recommendations, key=lambda item: item["score"], reverse=True)
