@@ -2,6 +2,90 @@ from django import forms
 from recommender.models import Job, Company, JobCategory, Application
 
 
+class JobSearchForm(forms.Form):
+    """
+    Handles the "Search & Filtering" controls on the public job listings page.
+
+    Every field is optional (required=False) since this form is bound to
+    GET parameters and any subset of filters may be supplied. Validation
+    here keeps bad/garbage input (e.g. a non-numeric salary) from ever
+    reaching the database query in the view.
+    """
+
+    SORT_CHOICES = [
+        ("-posted_at", "Newest First"),
+        ("posted_at", "Oldest First"),
+        ("-salary", "Salary: High to Low"),
+        ("salary", "Salary: Low to High"),
+        ("deadline", "Deadline: Soonest First"),
+    ]
+
+    search = forms.CharField(
+        required=False,
+        label="Keyword",
+        widget=forms.TextInput(attrs={"placeholder": "Search title, skills, description..."}),
+    )
+    location = forms.CharField(
+        required=False,
+        label="Location",
+        widget=forms.TextInput(attrs={"placeholder": "e.g. Kampala, Remote..."}),
+    )
+    company = forms.ModelChoiceField(
+        required=False,
+        label="Company",
+        queryset=Company.objects.order_by("name"),
+        empty_label="All Companies",
+    )
+    category = forms.ModelChoiceField(
+        required=False,
+        label="Category",
+        queryset=JobCategory.objects.order_by("name"),
+        empty_label="All Categories",
+    )
+    job_type = forms.ChoiceField(
+        required=False,
+        label="Job Type",
+        choices=[("", "All Job Types")] + list(Job.JOB_TYPES),
+    )
+    min_salary = forms.DecimalField(
+        required=False,
+        label="Min Pay",
+        min_value=0,
+        widget=forms.NumberInput(attrs={"placeholder": "Min Salary"}),
+    )
+    max_salary = forms.DecimalField(
+        required=False,
+        label="Max Pay",
+        min_value=0,
+        widget=forms.NumberInput(attrs={"placeholder": "Max Salary"}),
+    )
+    sort = forms.ChoiceField(
+        required=False,
+        label="Sort By",
+        choices=SORT_CHOICES,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            existing = field.widget.attrs.get("class", "")
+            base_class = "form-select" if isinstance(field.widget, forms.Select) else "form-control"
+            field.widget.attrs["class"] = f"{existing} {base_class} border-0 bg-light py-2".strip()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        min_salary = cleaned_data.get("min_salary")
+        max_salary = cleaned_data.get("max_salary")
+
+        if min_salary is not None and max_salary is not None and min_salary > max_salary:
+            # Swap silently rather than erroring out, so users get sane
+            # results even if they enter the range backwards.
+            cleaned_data["min_salary"], cleaned_data["max_salary"] = max_salary, min_salary
+
+        return cleaned_data
+
+
+
 class JobForm(forms.ModelForm):
     company_name = forms.CharField(
         max_length=200,
