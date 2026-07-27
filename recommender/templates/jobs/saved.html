@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Saved Jobs | Job Recommendation Engine{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h1 class="h2 fw-bold mb-1">
+                <i class="bi bi-heart-fill text-danger me-2"></i>Saved Jobs
+            </h1>
+            <p class="text-muted mb-0">Jobs you've bookmarked for later review.</p>
+        </div>
+        <a href="{% url 'job_list' %}" class="btn btn-outline-primary rounded-pill px-4">
+            <i class="bi bi-search me-1"></i> Browse All Jobs
+        </a>
+    </div>
+
+    {% if page_obj.object_list %}
+
+    <!-- Job Cards Grid -->
+    <div class="row g-4">
+        {% for saved in page_obj %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift">
+                <div class="card-body p-4">
+
+                    <!-- Company icon + title -->
+                    <div class="d-flex align-items-start gap-3 mb-3">
+                        <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width:48px; height:48px;">
+                            <i class="bi bi-building fs-5"></i>
+                        </div>
+                        <div class="flex-grow-1 min-w-0">
+                            <h2 class="h6 fw-bold text-dark mb-1 text-truncate">
+                                <a href="{% url 'job_detail' saved.job.id %}"
+                                   class="text-decoration-none text-dark stretched-link">
+                                    {{ saved.job.title }}
+                                </a>
+                            </h2>
+                            <p class="text-primary small fw-semibold mb-0">
+                                {{ saved.job.company.name }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Meta row -->
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-1 small">
+                            <i class="bi bi-briefcase me-1"></i>{{ saved.job.job_type }}
+                        </span>
+                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-2 py-1 small">
+                            <i class="bi bi-geo-alt me-1"></i>{{ saved.job.location }}
+                        </span>
+                        {% if saved.job.category %}
+                        <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-2 py-1 small">
+                            {{ saved.job.category.name }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Salary -->
+                    <p class="fw-bold text-success small mb-2">
+                        <i class="bi bi-cash-stack me-1"></i>
+                        UGX {{ saved.job.salary|floatformat:"0" }}
+                    </p>
+
+                    <!-- Date saved -->
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-bookmark-heart me-1"></i>
+                        Saved {{ saved.saved_at|date:"M d, Y" }}
+                    </p>
+                </div>
+
+                <!-- Card footer: unsave button -->
+                <div class="card-footer bg-transparent border-top-0 px-4 pb-4 pt-0 position-relative" style="z-index:1;">
+                    <form method="post" action="{% url 'toggle_save_job' saved.job.id %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                            class="btn btn-sm btn-outline-danger rounded-pill w-100"
+                            onclick="return confirm('Remove this job from saved list?')">
+                            <i class="bi bi-heart-fill me-1"></i> Remove
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav class="mt-5 d-flex justify-content-center" aria-label="Saved jobs pagination">
+        <ul class="pagination pagination-sm gap-1">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link rounded-pill px-3" href="?page={{ page_obj.previous_page_number }}"
+                   aria-label="Previous">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link rounded-pill px-3" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link rounded-pill px-3" href="?page={{ page_obj.next_page_number }}"
+                   aria-label="Next">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <!-- Empty state -->
+    <div class="text-center py-5 my-4">
+        <div class="bg-danger-subtle text-danger rounded-circle d-inline-flex align-items-center justify-content-center mb-4"
+             style="width:80px; height:80px;">
+            <i class="bi bi-heart fs-1"></i>
+        </div>
+        <h2 class="h4 fw-bold mb-2">No saved jobs yet</h2>
+        <p class="text-muted mb-4">
+            Browse jobs and click <strong>Save Job</strong> on any listing to bookmark it here.
+        </p>
+        <a href="{% url 'job_list' %}" class="btn btn-primary rounded-pill px-5">
+            <i class="bi bi-search me-1"></i> Browse Jobs
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+.hover-lift {
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10) !important;
+}
+</style>
+{% endblock %}

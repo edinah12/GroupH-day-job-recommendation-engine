@@ -70,6 +70,11 @@
                                 My Applications
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'saved_jobs' %}">
+                                <i class="bi bi-heart-fill text-danger me-1"></i>Saved Jobs
+                            </a>
+                        </li>
                         {% endif %}
                         {% endif %}
                         {% if user.is_authenticated and user.profile.is_recruiter %}

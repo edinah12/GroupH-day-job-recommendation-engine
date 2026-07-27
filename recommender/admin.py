@@ -6,6 +6,7 @@ from .models import (
     Job,
     Application,
     SavedJob,
+    JobView,
 )
 
 
@@ -46,4 +47,11 @@ class ApplicationAdmin(admin.ModelAdmin):
 @admin.register(SavedJob)
 class SavedJobAdmin(admin.ModelAdmin):
     list_display = ("user", "job", "saved_at")
+    search_fields = ("user__username", "job__title")
+
+
+@admin.register(JobView)
+class JobViewAdmin(admin.ModelAdmin):
+    list_display = ("user", "job", "viewed_at")
+    list_filter = ("viewed_at",)
     search_fields = ("user__username", "job__title")
