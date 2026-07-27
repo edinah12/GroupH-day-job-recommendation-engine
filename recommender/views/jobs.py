@@ -4,51 +4,85 @@ from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 
 from recommender.decorators import recruiter_required, seeker_required
-from recommender.forms import JobForm, JobApplicationForm
+from recommender.forms import JobForm, JobApplicationForm, JobSearchForm
 from recommender.models import Job, Application, JobCategory
 from recommender.utils import get_user_profile
 
 
 def job_list(request):
-    search_query = request.GET.get("search", "").strip()
-    category_id = request.GET.get("category", "").strip()
-    job_type = request.GET.get("job_type", "").strip()
-    location_query = request.GET.get("location", "").strip()
+    """
+    Public job listings page with Search & Filtering.
+
+    Supports refining results by keyword, location, pay (salary range),
+    job type, category and company - all combinable at once - plus
+    sorting. This view is independent of the recommendation engine
+    (recommender.recommendations.services); it never touches match
+    scores and only narrows down the plain Job queryset.
+    """
+    search_form = JobSearchForm(request.GET or None)
 
     jobs = Job.objects.select_related("company", "category").order_by("-posted_at")
 
-    if search_query:
-        jobs = jobs.filter(
-            Q(title__icontains=search_query) |
-            Q(company__name__icontains=search_query) |
-            Q(description__icontains=search_query) |
-            Q(required_skills__icontains=search_query)
-        )
+    # search_form.is_valid() also runs even with an empty query dict
+    # (all fields are optional), so this safely handles a fresh page load.
+    if search_form.is_valid():
+        data = search_form.cleaned_data
 
-    if category_id and category_id.isdigit():
-        jobs = jobs.filter(category_id=int(category_id))
+        search_query = (data.get("search") or "").strip()
+        if search_query:
+            jobs = jobs.filter(
+                Q(title__icontains=search_query)
+                | Q(company__name__icontains=search_query)
+                | Q(description__icontains=search_query)
+                | Q(requirements__icontains=search_query)
+                | Q(required_skills__icontains=search_query)
+            )
 
-    if job_type:
-        jobs = jobs.filter(job_type=job_type)
+        location_query = (data.get("location") or "").strip()
+        if location_query:
+            jobs = jobs.filter(location__icontains=location_query)
 
-    if location_query:
-        jobs = jobs.filter(location__icontains=location_query)
+        company = data.get("company")
+        if company:
+            jobs = jobs.filter(company=company)
 
-    categories = JobCategory.objects.all()
-    job_types = [jt[0] for jt in Job.JOB_TYPES]
+        category = data.get("category")
+        if category:
+            jobs = jobs.filter(category=category)
+
+        job_type = data.get("job_type")
+        if job_type:
+            jobs = jobs.filter(job_type=job_type)
+
+        min_salary = data.get("min_salary")
+        if min_salary is not None:
+            jobs = jobs.filter(salary__gte=min_salary)
+
+        max_salary = data.get("max_salary")
+        if max_salary is not None:
+            jobs = jobs.filter(salary__lte=max_salary)
+
+        sort_by = data.get("sort") or "-posted_at"
+        jobs = jobs.order_by(sort_by)
 
     return render(
         request,
         "jobs/list.html",
         {
             "jobs": jobs,
-            "categories": categories,
-            "job_types": job_types,
-            "search_query": search_query,
-            "selected_category": category_id,
-            "selected_job_type": job_type,
-            "location_query": location_query,
+            "search_form": search_form,
+            "active_filters": _has_active_filters(search_form),
         },
+    )
+
+
+def _has_active_filters(search_form: JobSearchForm) -> bool:
+    """True if the user has applied any search/filter criteria at all."""
+    if not search_form.is_bound:
+        return False
+    return any(
+        (search_form.data.get(name) or "").strip()
+        for name in search_form.fields
     )
 
 

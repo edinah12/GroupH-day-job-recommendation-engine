@@ -30,35 +30,62 @@
             <div class="col-md-4">
                 <div class="input-group">
                     <span class="input-group-text bg-light border-0 text-muted ps-3"><i class="bi bi-search"></i></span>
-                    <input type="text" name="search" class="form-control border-0 bg-light py-2" placeholder="Search title, skills, company..." value="{{ search_query|default:'' }}">
+                    {{ search_form.search }}
                 </div>
             </div>
 
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0 text-muted ps-3"><i class="bi bi-geo-alt"></i></span>
+                    {{ search_form.location }}
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                {{ search_form.company }}
+            </div>
+
             <div class="col-md-3">
-                <select name="category" class="form-select border-0 bg-light py-2">
-                    <option value="">All Categories</option>
-                    {% for cat in categories %}
-                    <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
-                    {% endfor %}
-                </select>
+                {{ search_form.category }}
+            </div>
+
+            <div class="col-md-3">
+                {{ search_form.job_type }}
             </div>
 
             <div class="col-md-2">
-                <select name="job_type" class="form-select border-0 bg-light py-2">
-                    <option value="">All Job Types</option>
-                    {% for jt in job_types %}
-                    <option value="{{ jt }}" {% if selected_job_type == jt %}selected{% endif %}>{{ jt }}</option>
-                    {% endfor %}
-                </select>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0 text-muted px-2">UGX</span>
+                    {{ search_form.min_salary }}
+                </div>
             </div>
 
-            <div class="col-md-3 d-flex gap-2">
-                <button type="submit" class="btn btn-primary rounded-3 px-4 fw-semibold w-100 py-2">
-                    Filter Jobs
+            <div class="col-md-2">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0 text-muted px-2">UGX</span>
+                    {{ search_form.max_salary }}
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                {{ search_form.sort }}
+            </div>
+
+            {% if search_form.errors %}
+            <div class="col-12">
+                <div class="alert alert-warning py-2 px-3 mb-0 small">
+                    Please correct the highlighted filter values below and try again.
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="col-12 d-flex gap-2 justify-content-end">
+                <button type="submit" class="btn btn-primary rounded-3 px-4 fw-semibold py-2">
+                    <i class="bi bi-funnel me-1"></i> Filter Jobs
                 </button>
-                {% if search_query or selected_category or selected_job_type or location_query %}
+                {% if active_filters %}
                 <a href="{% url 'job_list' %}" class="btn btn-outline-secondary rounded-3 px-3 py-2 text-nowrap" title="Reset Filters">
-                    <i class="bi bi-x-lg"></i>
+                    <i class="bi bi-x-lg me-1"></i> Reset
                 </a>
                 {% endif %}
             </div>
