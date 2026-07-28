@@ -9,8 +9,14 @@ class StyledAuthenticationForm(AuthenticationForm):
         for field in self.fields.values():
             existing = field.widget.attrs.get("class", "")
             field.widget.attrs["class"] = f"{existing} form-control".strip()
-        self.fields["username"].widget.attrs["autocomplete"] = "username"
-        self.fields["password"].widget.attrs["autocomplete"] = "current-password"
+        self.fields["username"].widget.attrs.update({
+            "autocomplete": "username",
+            "placeholder": "Enter your username or email"
+        })
+        self.fields["password"].widget.attrs.update({
+            "autocomplete": "current-password",
+            "placeholder": "Enter your password"
+        })
 
 
 from recommender.models import Profile

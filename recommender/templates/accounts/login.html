@@ -1,61 +1,160 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Login - Job Recommendation Engine{% endblock %}
 
 {% block content %}
+<div class="auth-page-wrapper">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10 col-xl-9">
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-7 col-lg-5">
+                <div class="auth-split-card">
+                    <div class="row g-0">
+                        
+                        <!-- Left Hero Branding Panel -->
+                        <div class="col-lg-6 auth-hero-panel d-none d-lg-flex">
+                            <div class="position-relative z-2 my-auto">
+                                <!-- Brand Header -->
+                                <div class="d-flex align-items-center gap-2 mb-4">
+                                    <div class="bg-white bg-opacity-20 rounded-3 p-2 d-inline-flex align-items-center justify-content-center">
+                                        <i class="bi bi-briefcase-fill fs-4 text-white"></i>
+                                    </div>
+                                    <span class="fw-bold fs-5 tracking-tight">Job Engine</span>
+                                </div>
 
-            <div class="card card-auth p-4 p-sm-5">
-                <div class="text-center mb-4">
-                    <div class="icon-box bg-primary-subtle text-primary mb-3 mx-auto">
-                        <i class="bi bi-box-arrow-in-right fs-3"></i>
+                                <!-- Inspirational Headline & Features -->
+                                <h1 class="fw-bold display-6 mb-3 lh-sm text-white">
+                                    Your dream Job<br><span style="color: #93c5fd;">Is Near to You</span>
+                                </h1>
+                                <p class="text-white-50 mb-4 fs-6">
+                                    Effortlessly connect with top recruiters and find matching opportunities tailored to your skills.
+                                </p>
+
+                                <div class="d-flex flex-column gap-2 text-white-50 small">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-check-circle-fill text-info"></i>
+                                        <span class="text-white">AI-Powered Skill & Preferences Matching</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-check-circle-fill text-info"></i>
+                                        <span class="text-white">Real-Time Application Status Tracking</span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-check-circle-fill text-info"></i>
+                                        <span class="text-white">Direct Connect with Verified Employers</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Form Panel -->
+                        <div class="col-lg-6 auth-form-panel">
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <a href="{% url 'home' %}" class="text-muted text-decoration-none small d-inline-flex align-items-center gap-1 hover-primary">
+                                    <i class="bi bi-arrow-left"></i> Back to Home
+                                </a>
+                            </div>
+
+                            <div class="mb-4">
+                                <h2 class="h3 fw-bold text-dark mb-1">Welcome Back</h2>
+                                <p class="text-muted small">Enter your credentials to access your account.</p>
+                            </div>
+
+                            <form method="post" novalidate>
+                                {% csrf_token %}
+
+                                {% if form.non_field_errors %}
+                                    <div class="alert alert-danger p-2.5 rounded-3 small mb-3 border-0 bg-danger-subtle text-danger">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                        {% for error in form.non_field_errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Username / Email Field -->
+                                <div class="mb-3">
+                                    <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                                        Username
+                                    </label>
+                                    <div class="input-group-icon">
+                                        <i class="bi bi-person input-icon-left"></i>
+                                        {{ form.username }}
+                                    </div>
+                                    {% for error in form.username.errors %}
+                                        <div class="text-danger small mt-1">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- Password Field -->
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold small text-secondary mb-0">
+                                            Password
+                                        </label>
+                                        <a href="{% url 'password_reset' %}" class="small text-primary text-decoration-none fw-medium">
+                                            Forgot Password?
+                                        </a>
+                                    </div>
+                                    <div class="input-group-icon">
+                                        <i class="bi bi-lock input-icon-left"></i>
+                                        {{ form.password }}
+                                        <button type="button" class="btn-toggle-password" id="togglePasswordBtn" aria-label="Toggle password visibility">
+                                            <i class="bi bi-eye-slash" id="togglePasswordIcon"></i>
+                                        </button>
+                                    </div>
+                                    {% for error in form.password.errors %}
+                                        <div class="text-danger small mt-1">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- Remember Me Checkbox -->
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" id="rememberMe" name="remember_me">
+                                    <label class="form-check-label small text-muted" for="rememberMe">
+                                        Remember me on this device
+                                    </label>
+                                </div>
+
+                                <!-- Submit CTA Button -->
+                                <button type="submit" class="btn btn-primary w-100 py-2.5 rounded-3 fw-semibold shadow-sm fs-6">
+                                    Log In <i class="bi bi-arrow-right me-1"></i>
+                                </button>
+                            </form>
+
+                            <!-- Register Toggle Link -->
+                            <div class="text-center mt-4 pt-2">
+                                <p class="small text-muted mb-0">
+                                    Don't have an account?
+                                    <a href="{% url 'register' %}" class="fw-bold text-primary text-decoration-none ms-1">Register Now</a>
+                                </p>
+                            </div>
+
+                        </div>
+
                     </div>
-                    <h1 class="h3 fw-bold mb-1">Welcome Back</h1>
-                    <p class="text-muted small">Sign in to manage your profile and applications.</p>
                 </div>
 
-                <form method="post" novalidate>
-                    {% csrf_token %}
-
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger p-2 small mb-3">
-                            {{ form.non_field_errors }}
-                        </div>
-                    {% endif %}
-
-                    {% for field in form %}
-                        <div class="mb-3">
-                            <label class="form-label" for="{{ field.id_for_label }}">
-                                {{ field.label }}
-                            </label>
-                            {{ field }}
-                            {% for error in field.errors %}
-                                <div class="invalid-feedback d-block small mt-1">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-
-                    <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill mt-2 fw-semibold">
-                        Sign In
-                    </button>
-                </form>
-
-                <div class="text-center mt-4 pt-3 border-top">
-                    <p class="small mb-2">
-                        <a href="{% url 'password_reset' %}" class="text-muted text-decoration-none">Forgot password?</a>
-                    </p>
-                    <p class="small text-muted mb-0">
-                        Don't have an account?
-                        <a href="{% url 'register' %}" class="fw-semibold text-primary text-decoration-none ms-1">Create one</a>
-                    </p>
-                </div>
             </div>
-
         </div>
     </div>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+        const toggleIcon = document.getElementById('togglePasswordIcon');
+        const passwordInput = document.querySelector('input[type="password"]');
+
+        if (toggleBtn && passwordInput) {
+            toggleBtn.addEventListener('click', function() {
+                const isPassword = passwordInput.getAttribute('type') === 'password';
+                passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+                toggleIcon.className = isPassword ? 'bi bi-eye' : 'bi bi-eye-slash';
+            });
+        }
+    });
+</script>
 {% endblock %}

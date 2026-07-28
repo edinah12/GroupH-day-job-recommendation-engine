@@ -70,15 +70,22 @@
   .job-meta i { margin-right: 3px; opacity: 0.6; }
 
   /* ── Progress bar ────────────────────────────────────────── */
-  .match-progress { height: 8px; border-radius: 50px; background: #f1f5f9; overflow: hidden; }
-  .match-progress .progress-bar {
-    border-radius: 50px;
-    transition: width 0.8s ease;
+  .match-progress {
+    display: flex !important;
+    height: 10px !important;
+    border-radius: 50px !important;
+    background-color: #e2e8f0 !important;
+    overflow: hidden !important;
   }
-  .bar-excellent { background: linear-gradient(90deg, #10b981, #34d399); }
-  .bar-good      { background: linear-gradient(90deg, #0d6efd, #60a5fa); }
-  .bar-fair      { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-  .bar-poor      { background: linear-gradient(90deg, #94a3b8, #cbd5e1); }
+  .match-progress .progress-bar {
+    height: 100% !important;
+    border-radius: 50px !important;
+    transition: width 0.8s ease !important;
+  }
+  .bar-excellent { background: linear-gradient(90deg, #10b981, #34d399) !important; background-color: #10b981 !important; }
+  .bar-good      { background: linear-gradient(90deg, #0d6efd, #60a5fa) !important; background-color: #0d6efd !important; }
+  .bar-fair      { background: linear-gradient(90deg, #f59e0b, #fbbf24) !important; background-color: #f59e0b !important; }
+  .bar-poor      { background: linear-gradient(90deg, #94a3b8, #cbd5e1) !important; background-color: #94a3b8 !important; }
 
   /* ── Score percentage ────────────────────────────────────── */
   .score-pct { font-size: 1.4rem; font-weight: 800; line-height: 1; }

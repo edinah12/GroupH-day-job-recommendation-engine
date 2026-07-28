@@ -327,3 +327,20 @@ def update_application_status(request, application_id):
             messages.success(request, f"Application status updated to '{new_status}'.")
 
     return redirect("job_applicants", job_id=application.job.id)
+
+
+@seeker_required
+def seeker_applications(request):
+    """
+    Display a list of all job applications submitted by the current job seeker.
+    """
+    applications = (
+        Application.objects.filter(user=request.user)
+        .select_related("job", "job__company", "job__category")
+        .order_by("-applied_at")
+    )
+    return render(
+        request,
+        "jobs/my_applications.html",
+        {"applications": applications},
+    )
