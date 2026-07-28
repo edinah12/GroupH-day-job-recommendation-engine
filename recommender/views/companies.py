@@ -1,6 +1,13 @@
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Count, Q
 from ..models import Company
+from ..search import fuzzy_filter
+
+
+def _company_search_text(company):
+    # See recommender/views/jobs.py::_job_search_text for why description
+    # is excluded from the fuzzy pass (it's covered by the exact pass).
+    return " ".join(filter(None, [company.name, company.location]))
 
 
 def company_list(request):
@@ -8,10 +15,13 @@ def company_list(request):
     companies = Company.objects.annotate(active_jobs_count=Count("jobs")).order_by("name")
 
     if search_query:
-        companies = companies.filter(
-            Q(name__icontains=search_query)
-            | Q(location__icontains=search_query)
-            | Q(description__icontains=search_query)
+        # Typo-tolerant: also catches close misspellings, not just exact
+        # substrings. See recommender/search.py.
+        companies = fuzzy_filter(
+            companies,
+            search_query,
+            exact_fields=["name", "location", "description"],
+            text_fn=_company_search_text,
         )
 
     return render(

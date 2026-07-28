@@ -1,7 +1,23 @@
 from django.shortcuts import render, redirect
 from django.db.models import Q
 from ..models import Job, Company, JobCategory
+from ..search import fuzzy_filter
 from ..utils import get_user_profile
+
+
+def _job_search_text(job):
+    # See recommender/views/jobs.py::_job_search_text for why description
+    # is excluded from the fuzzy pass (it's covered by the exact pass).
+    return " ".join(
+        filter(
+            None,
+            [
+                job.title,
+                job.company.name if job.company_id else "",
+                job.location,
+            ],
+        )
+    )
 
 
 def home(request):
@@ -10,10 +26,13 @@ def home(request):
     if not request.user.is_authenticated:
         featured_jobs = Job.objects.select_related("company", "category").order_by("-posted_at")
         if search_query:
-            featured_jobs = featured_jobs.filter(
-                Q(title__icontains=search_query) |
-                Q(company__name__icontains=search_query) |
-                Q(description__icontains=search_query)
+            # Typo-tolerant: also catches close misspellings, not just
+            # exact substrings. See recommender/search.py.
+            featured_jobs = fuzzy_filter(
+                featured_jobs,
+                search_query,
+                exact_fields=["title", "company__name", "description"],
+                text_fn=_job_search_text,
             )
         featured_jobs = featured_jobs[:6]
         
@@ -38,10 +57,11 @@ def home(request):
 
     jobs = Job.objects.select_related("company", "category").order_by("-posted_at")
     if search_query:
-        jobs = jobs.filter(
-            Q(title__icontains=search_query) |
-            Q(company__name__icontains=search_query) |
-            Q(description__icontains=search_query)
+        jobs = fuzzy_filter(
+            jobs,
+            search_query,
+            exact_fields=["title", "company__name", "description"],
+            text_fn=_job_search_text,
         )
         
     recommended_jobs = []

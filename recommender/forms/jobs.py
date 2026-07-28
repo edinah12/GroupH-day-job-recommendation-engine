@@ -13,8 +13,8 @@ class JobSearchForm(forms.Form):
     """
 
     SORT_CHOICES = [
-        ("-posted_at", "Newest First"),
-        ("posted_at", "Oldest First"),
+        ("-posted_at", "Newest to Oldest"),
+        ("posted_at", "Oldest to Newest"),
         ("-salary", "Salary: High to Low"),
         ("salary", "Salary: Low to High"),
         ("deadline", "Deadline: Soonest First"),
