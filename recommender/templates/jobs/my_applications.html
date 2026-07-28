@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}My Applications — Job Recommendation Engine{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h1 class="h2 fw-bold mb-1">
+                <i class="bi bi-file-earmark-text text-primary me-2"></i>My Applications
+            </h1>
+            <p class="text-muted mb-0">Track and manage all the job applications you have submitted.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary rounded-pill px-3">
+                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+            </a>
+            <a href="{% url 'job_list' %}" class="btn btn-primary rounded-pill px-4">
+                <i class="bi bi-search me-1"></i> Browse Jobs
+            </a>
+        </div>
+    </div>
+
+    {% if applications %}
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr class="text-secondary small text-uppercase">
+                        <th class="ps-4 py-3">Job & Company</th>
+                        <th class="py-3">Category</th>
+                        <th class="py-3">Applied On</th>
+                        <th class="py-3">Status</th>
+                        <th class="pe-4 py-3 text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr>
+                        <!-- Job & Company -->
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-primary-subtle text-primary rounded-3 p-2.5 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
+                                    <i class="bi bi-building fs-5"></i>
+                                </div>
+                                <div>
+                                    <a href="{% url 'job_detail' app.job.id %}" class="fw-bold text-dark text-decoration-none d-block hover-primary fs-6">
+                                        {{ app.job.title }}
+                                    </a>
+                                    <div class="text-muted small">
+                                        {{ app.job.company.name }} &bull; <i class="bi bi-geo-alt me-1"></i>{{ app.job.location }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Category -->
+                        <td class="py-3">
+                            {% if app.job.category %}
+                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-1.5 small fw-normal">
+                                    {{ app.job.category.name }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted small">—</span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Applied On -->
+                        <td class="py-3 text-muted small">
+                            <i class="bi bi-calendar-event me-1"></i>{{ app.applied_at|date:"M d, Y" }}
+                        </td>
+
+                        <!-- Status -->
+                        <td class="py-3">
+                            {% if app.status == 'Accepted' %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 fw-semibold small">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Accepted
+                                </span>
+                            {% elif app.status == 'Rejected' %}
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1.5 fw-semibold small">
+                                    <i class="bi bi-x-circle-fill me-1"></i> Rejected
+                                </span>
+                            {% elif app.status == 'Reviewed' %}
+                                <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3 py-1.5 fw-semibold small">
+                                    <i class="bi bi-eye-fill me-1"></i> Reviewed
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1.5 fw-semibold small">
+                                    <i class="bi bi-clock-history me-1"></i> Pending
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Action -->
+                        <td class="pe-4 py-3 text-end">
+                            <a href="{% url 'job_detail' app.job.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
+                                View Job <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% else %}
+
+    <!-- Empty state -->
+    <div class="card border-0 shadow-sm rounded-4 text-center py-5 my-4">
+        <div class="card-body py-4">
+            <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                <i class="bi bi-file-earmark-x fs-1"></i>
+            </div>
+            <h2 class="h4 fw-bold text-dark mb-2">No Job Applications Found</h2>
+            <p class="text-muted mb-4 mx-auto" style="max-width: 450px;">
+                You haven't submitted any job applications yet. Browse active job listings and apply to get started.
+            </p>
+            <a href="{% url 'job_list' %}" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold">
+                <i class="bi bi-search me-1"></i> Browse Jobs
+            </a>
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>
+{% endblock %}

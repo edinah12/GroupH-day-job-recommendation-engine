@@ -66,8 +66,13 @@
                         </li>
                         {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'seeker_dashboard' %}">
+                            <a class="nav-link" href="{% url 'seeker_applications' %}">
                                 My Applications
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'saved_jobs' %}">
+                                <i class="bi bi-heart-fill text-danger me-1"></i>Saved Jobs
                             </a>
                         </li>
                         {% endif %}
@@ -87,6 +92,8 @@
                                 <i class="bi bi-person-fill me-1"></i> {{ user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                                <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i
+                                            class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
                                 <li><a class="dropdown-item" href="{% url 'view_profile' %}"><i
                                             class="bi bi-person me-2"></i> Profile</a></li>
                                 <li>

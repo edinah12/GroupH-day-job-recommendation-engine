@@ -14,6 +14,7 @@ class Profile(models.Model):
         max_length=20,
         choices=ROLE_CHOICES,
         default=ROLE_SEEKER,
+        db_index=True,
     )
 
     company_name = models.CharField(max_length=200, blank=True)
@@ -42,11 +43,13 @@ class Profile(models.Model):
     preferred_location = models.CharField(
         max_length=100,
         blank=True,
+        db_index=True,
     )
 
     preferred_category = models.CharField(
         max_length=100,
         blank=True,
+        db_index=True,
     )
 
     expected_salary = models.DecimalField(
@@ -69,6 +72,12 @@ class Profile(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["role"]),
+            models.Index(fields=["preferred_location", "preferred_category"]),
+        ]
 
     @property
     def is_recruiter(self):
@@ -106,7 +115,7 @@ class Company(models.Model):
     name = models.CharField(max_length=200, unique=True)
     email = models.EmailField(blank=True)
     website = models.URLField(blank=True)
-    location = models.CharField(max_length=100)
+    location = models.CharField(max_length=100, db_index=True)
     description = models.TextField(blank=True)
     logo = models.ImageField(upload_to="company_logos/", blank=True, null=True)
 
@@ -153,23 +162,32 @@ class Job(models.Model):
         help_text="Separate skills using commas"
     )
 
-    location = models.CharField(max_length=100)
+    location = models.CharField(max_length=100, db_index=True)
 
     salary = models.DecimalField(
         max_digits=10,
-        decimal_places=2
+        decimal_places=2,
+        db_index=True,
     )
 
-    experience_required = models.PositiveIntegerField()
+    experience_required = models.PositiveIntegerField(db_index=True)
 
     job_type = models.CharField(
         max_length=20,
-        choices=JOB_TYPES
+        choices=JOB_TYPES,
+        db_index=True,
     )
 
     deadline = models.DateField()
 
-    posted_at = models.DateTimeField(auto_now_add=True)
+    posted_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["location", "category"]),
+            models.Index(fields=["job_type", "salary"]),
+            models.Index(fields=["-posted_at"]),
+        ]
 
     def skills_list(self):
         if not self.required_skills or not self.required_skills.strip():
@@ -203,15 +221,20 @@ class Application(models.Model):
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default="Pending"
+        default="Pending",
+        db_index=True,
     )
 
     cover_letter = models.TextField(blank=True)
 
-    applied_at = models.DateTimeField(auto_now_add=True)
+    applied_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         unique_together = ("user", "job")
+        indexes = [
+            models.Index(fields=["status"]),
+            models.Index(fields=["-applied_at"]),
+        ]
 
     def __str__(self):
         return f"{self.user.username} - {self.job.title}"
@@ -230,10 +253,48 @@ class SavedJob(models.Model):
         related_name="saved_by"
     )
 
-    saved_at = models.DateTimeField(auto_now_add=True)
+    saved_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         unique_together = ("user", "job")
+        indexes = [
+            models.Index(fields=["-saved_at"]),
+        ]
 
-    def __str__(self):
-        return f"{self.user.username} saved {self.job.title}"           
+    def __str__(self) -> str:
+        return f"{self.user.username} saved {self.job.title}"
+
+
+class JobView(models.Model):
+    """
+    Records the first time a logged-in user views a job detail page.
+
+    Only the *first* view is stored (unique_together enforces this),
+    so the table stays small and queries remain fast.  Anonymous views
+    are never recorded.
+
+    Used by the recommendation engine to provide a small preference
+    boost toward jobs in the same category / with similar skills as
+    previously viewed jobs.
+    """
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="job_views",
+    )
+
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE,
+        related_name="views",
+    )
+
+    viewed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "job")
+        ordering = ["-viewed_at"]
+
+    def __str__(self) -> str:
+        return f"{self.user.username} viewed {self.job.title}"

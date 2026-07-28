@@ -52,11 +52,11 @@ Expected context variables (set by the caller via {% with %}):
           <span class="score-pct score-{{ tier }}">{{ item.score }}%</span>
         </div>
 
-        <div class="match-progress mb-1">
+        <div class="progress match-progress mb-1" style="height: 10px; background-color: #e2e8f0;">
           <div
             class="progress-bar bar-{{ tier }}"
             role="progressbar"
-            style="width: {{ item.score }}%;"
+            style="width: {{ item.score }}%; height: 100%;"
             aria-valuenow="{{ item.score }}"
             aria-valuemin="0"
             aria-valuemax="100">

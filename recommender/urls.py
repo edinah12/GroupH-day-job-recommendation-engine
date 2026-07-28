@@ -15,6 +15,9 @@ from .views.jobs import (
     apply_job,
     job_applicants,
     update_application_status,
+    toggle_save_job,
+    saved_jobs,
+    seeker_applications,
 )
 
 urlpatterns = [
@@ -22,7 +25,8 @@ urlpatterns = [
     path("dashboard/", dashboard, name="dashboard"),
     path("recruiter/dashboard/", recruiter_dashboard, name="recruiter_dashboard"),
     path("recruiter/jobs/", recruiter_jobs, name="recruiter_jobs"),
-    path("my-applications/", seeker_dashboard, name="seeker_dashboard"),
+    path("seeker/dashboard/", seeker_dashboard, name="seeker_dashboard"),
+    path("my-applications/", seeker_applications, name="seeker_applications"),
     
     path("recommendations/", include("recommender.recommendations.urls")),
 
@@ -64,8 +68,10 @@ urlpatterns = [
     ),
 
     path("jobs/", job_list, name="job_list"),
+    path("jobs/saved/", saved_jobs, name="saved_jobs"),
     path("jobs/create/", create_job, name="create_job"),
     path("jobs/<int:job_id>/", job_detail, name="job_detail"),
+    path("jobs/<int:job_id>/save/", toggle_save_job, name="toggle_save_job"),
     path("jobs/<int:job_id>/edit/", edit_job, name="edit_job"),
     path("jobs/<int:job_id>/delete/", delete_job, name="delete_job"),
     path("jobs/<int:job_id>/apply/", apply_job, name="apply_job"),
