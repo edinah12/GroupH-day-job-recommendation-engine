@@ -15,6 +15,8 @@ from .views.jobs import (
     apply_job,
     job_applicants,
     update_application_status,
+    toggle_save_job,
+    saved_jobs,
 )
 
 urlpatterns = [
@@ -64,8 +66,10 @@ urlpatterns = [
     ),
 
     path("jobs/", job_list, name="job_list"),
+    path("jobs/saved/", saved_jobs, name="saved_jobs"),
     path("jobs/create/", create_job, name="create_job"),
     path("jobs/<int:job_id>/", job_detail, name="job_detail"),
+    path("jobs/<int:job_id>/save/", toggle_save_job, name="toggle_save_job"),
     path("jobs/<int:job_id>/edit/", edit_job, name="edit_job"),
     path("jobs/<int:job_id>/delete/", delete_job, name="delete_job"),
     path("jobs/<int:job_id>/apply/", apply_job, name="apply_job"),

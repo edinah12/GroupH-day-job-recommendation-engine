@@ -261,5 +261,40 @@ class SavedJob(models.Model):
             models.Index(fields=["-saved_at"]),
         ]
 
-    def __str__(self):
-        return f"{self.user.username} saved {self.job.title}"           
+    def __str__(self) -> str:
+        return f"{self.user.username} saved {self.job.title}"
+
+
+class JobView(models.Model):
+    """
+    Records the first time a logged-in user views a job detail page.
+
+    Only the *first* view is stored (unique_together enforces this),
+    so the table stays small and queries remain fast.  Anonymous views
+    are never recorded.
+
+    Used by the recommendation engine to provide a small preference
+    boost toward jobs in the same category / with similar skills as
+    previously viewed jobs.
+    """
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="job_views",
+    )
+
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE,
+        related_name="views",
+    )
+
+    viewed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "job")
+        ordering = ["-viewed_at"]
+
+    def __str__(self) -> str:
+        return f"{self.user.username} viewed {self.job.title}"

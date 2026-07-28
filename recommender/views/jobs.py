@@ -1,11 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 
 from recommender.decorators import recruiter_required, seeker_required
 from recommender.forms import JobForm, JobApplicationForm, JobSearchForm
-from recommender.models import Job, Application, JobCategory
+from recommender.models import Job, Application, SavedJob, JobView, JobCategory
 from recommender.utils import get_user_profile
 
 
@@ -86,15 +87,37 @@ def _has_active_filters(search_form: JobSearchForm) -> bool:
     )
 
 
-def job_detail(request, job_id):
-    job = get_object_or_404(Job, id=job_id)
+def job_detail(request, job_id: int):
+    """
+    Render the job detail page.
+
+    For authenticated seekers:
+      - Checks whether the user has already applied (has_applied).
+      - Checks whether the user has saved this job (is_saved).
+      - Records a JobView (silently ignored on repeat visits via get_or_create).
+
+    For authenticated recruiters who own the job:
+      - Sets is_owner = True to show management controls.
+    """
+    job = get_object_or_404(
+        Job.objects.select_related("company", "category"),
+        id=job_id,
+    )
     has_applied = False
+    is_saved = False
     is_owner = False
 
     if request.user.is_authenticated:
         profile = get_user_profile(request.user)
         if profile.is_seeker:
-            has_applied = Application.objects.filter(user=request.user, job=job).exists()
+            has_applied = Application.objects.filter(
+                user=request.user, job=job
+            ).exists()
+            is_saved = SavedJob.objects.filter(
+                user=request.user, job=job
+            ).exists()
+            # Record first view; subsequent visits are silently ignored.
+            JobView.objects.get_or_create(user=request.user, job=job)
         elif profile.is_recruiter and job.posted_by == request.user:
             is_owner = True
 
@@ -104,9 +127,59 @@ def job_detail(request, job_id):
         {
             "job": job,
             "has_applied": has_applied,
+            "is_saved": is_saved,
             "is_owner": is_owner,
         },
     )
+
+
+@seeker_required
+def toggle_save_job(request, job_id: int):
+    """
+    Toggle the saved state of a job for the current seeker.
+
+    POST-only endpoint.  Uses get_or_create so a double-submit never
+    creates duplicate rows.  If the job was already saved the existing
+    SavedJob row is deleted (unsave).  Redirects back to the job detail
+    page with a flash message in both cases.
+    """
+    if request.method != "POST":
+        return redirect("job_detail", job_id=job_id)
+
+    job = get_object_or_404(Job, id=job_id)
+    saved_obj, created = SavedJob.objects.get_or_create(
+        user=request.user, job=job
+    )
+
+    if created:
+        messages.success(request, f"\"{job.title}\" added to your saved jobs.")
+    else:
+        saved_obj.delete()
+        messages.info(request, f"\"{job.title}\" removed from saved jobs.")
+
+    return redirect("job_detail", job_id=job_id)
+
+
+@login_required
+def saved_jobs(request):
+    """
+    Display a paginated list of jobs the current user has saved.
+
+    Results are ordered newest-saved-first.  Only available to
+    authenticated users; seekers see their own saved jobs.
+    """
+    saved = (
+        SavedJob.objects
+        .filter(user=request.user)
+        .select_related("job", "job__company", "job__category")
+        .order_by("-saved_at")
+    )
+
+    paginator = Paginator(saved, 12)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "jobs/saved.html", {"page_obj": page_obj})
 
 
 @recruiter_required
@@ -219,7 +292,6 @@ def apply_job(request, job_id):
             "already_applied": False,
         },
     )
-
 
 
 @recruiter_required

@@ -1,78 +1,230 @@
 {% extends "base.html" %}
 
-{% block title %}My Applications — Job Recommendation Engine{% endblock %}
+{% block title %}My Dashboard — Job Recommendation Engine{% endblock %}
 
 {% block content %}
 <div class="container my-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+
+    <!-- Page Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
-            <h1 class="h2 mb-1">My Applications</h1>
-            <p class="text-muted mb-0">Track the status of your submitted job applications.</p>
+            <h1 class="h2 fw-bold mb-1">My Dashboard</h1>
+            <p class="text-muted mb-0">Track your applications, saved jobs, and top recommendations.</p>
         </div>
-        <a href="{% url 'home' %}" class="btn btn-outline-primary">
-            🔍 Browse All Jobs
+        <a href="{% url 'home' %}" class="btn btn-outline-primary rounded-pill">
+            <i class="bi bi-search me-1"></i> Browse All Jobs
         </a>
     </div>
 
-    <!-- Applications Table -->
-    <div class="card border-0 shadow-sm mb-5">
-        <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold">Submitted Job Applications</h5>
+    <!-- ── Quick Stats ──────────────────────────────────────────────── -->
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center rounded-4 p-3">
+                <div class="bg-primary-subtle text-primary rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-2"
+                     style="width:48px; height:48px;">
+                    <i class="bi bi-send-fill fs-5"></i>
+                </div>
+                <h2 class="h4 fw-bold mb-0">{{ applications.count }}</h2>
+                <small class="text-muted">Applications</small>
+            </div>
         </div>
-        <div class="card-body p-0">
-            {% if applications %}
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-4">Job Title</th>
-                                <th>Company</th>
-                                <th>Type</th>
-                                <th>Applied Date</th>
-                                <th>Status</th>
-                                <th class="text-end pe-4">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for app in applications %}
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center rounded-4 p-3">
+                <div class="bg-danger-subtle text-danger rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-2"
+                     style="width:48px; height:48px;">
+                    <i class="bi bi-heart-fill fs-5"></i>
+                </div>
+                <h2 class="h4 fw-bold mb-0">{{ saved_jobs.count }}</h2>
+                <small class="text-muted">Saved Jobs</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center rounded-4 p-3">
+                <div class="bg-success-subtle text-success rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-2"
+                     style="width:48px; height:48px;">
+                    <i class="bi bi-check-circle-fill fs-5"></i>
+                </div>
+                {% with accepted=applications|dictsort:"status" %}
+                <h2 class="h4 fw-bold mb-0">
+                    {{ applications.all|length }}
+                </h2>
+                {% endwith %}
+                <small class="text-muted">Total Activity</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center rounded-4 p-3">
+                <div class="bg-warning-subtle text-warning rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-2"
+                     style="width:48px; height:48px;">
+                    <i class="bi bi-star-fill fs-5"></i>
+                </div>
+                <h2 class="h4 fw-bold mb-0">{{ top_recommendations|length }}</h2>
+                <small class="text-muted">Recommendations</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- ── Left column ───────────────────────────────────────────── -->
+        <div class="col-lg-7">
+
+            <!-- Recent Applications -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white py-3 rounded-top-4 d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0 fw-bold">
+                        <i class="bi bi-send text-primary me-2"></i>Recent Applications
+                    </h2>
+                    <a href="{% url 'seeker_dashboard' %}" class="btn btn-sm btn-outline-primary rounded-pill">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    {% if applications %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Job</th>
+                                    <th>Company</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for app in applications|slice:":5" %}
                                 <tr>
                                     <td class="ps-4">
-                                        <a href="{% url 'job_detail' app.job.id %}" class="fw-bold text-decoration-none text-dark">
+                                        <a href="{% url 'job_detail' app.job.id %}"
+                                           class="fw-semibold text-decoration-none text-dark">
                                             {{ app.job.title }}
                                         </a>
                                     </td>
-                                    <td>{{ app.job.company.name }}</td>
-                                    <td><span class="badge bg-secondary">{{ app.job.job_type }}</span></td>
+                                    <td class="text-muted small">{{ app.job.company.name }}</td>
                                     <td class="text-muted small">{{ app.applied_at|date:"M d, Y" }}</td>
                                     <td>
                                         {% if app.status == 'Accepted' %}
-                                            <span class="badge bg-success">Accepted</span>
+                                            <span class="badge bg-success rounded-pill">Accepted</span>
                                         {% elif app.status == 'Rejected' %}
-                                            <span class="badge bg-danger">Rejected</span>
+                                            <span class="badge bg-danger rounded-pill">Rejected</span>
                                         {% elif app.status == 'Reviewed' %}
-                                            <span class="badge bg-info text-dark">Reviewed</span>
+                                            <span class="badge bg-info text-dark rounded-pill">Reviewed</span>
                                         {% else %}
-                                            <span class="badge bg-warning text-dark">Pending</span>
+                                            <span class="badge bg-warning text-dark rounded-pill">Pending</span>
                                         {% endif %}
                                     </td>
-                                    <td class="text-end pe-4">
-                                        <a href="{% url 'job_detail' app.job.id %}" class="btn btn-sm btn-outline-primary">View Job</a>
-                                    </td>
                                 </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                        <p class="mb-2 small">No applications yet.</p>
+                        <a href="{% url 'home' %}" class="btn btn-sm btn-primary rounded-pill">Find Jobs</a>
+                    </div>
+                    {% endif %}
                 </div>
-            {% else %}
-                <div class="text-center py-5">
-                    <p class="text-muted mb-3">You haven't applied for any jobs yet.</p>
-                    <a href="{% url 'home' %}" class="btn btn-primary">
-                        Find Jobs Now
-                    </a>
+            </div>
+
+            <!-- Recently Saved Jobs -->
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 rounded-top-4 d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0 fw-bold">
+                        <i class="bi bi-heart-fill text-danger me-2"></i>Recently Saved Jobs
+                    </h2>
+                    <a href="{% url 'saved_jobs' %}" class="btn btn-sm btn-outline-danger rounded-pill">View All</a>
                 </div>
-            {% endif %}
+                <div class="card-body p-0">
+                    {% if saved_jobs %}
+                    <ul class="list-group list-group-flush rounded-4">
+                        {% for saved in saved_jobs|slice:":4" %}
+                        <li class="list-group-item px-4 py-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <a href="{% url 'job_detail' saved.job.id %}"
+                                       class="fw-semibold text-decoration-none text-dark d-block">
+                                        {{ saved.job.title }}
+                                    </a>
+                                    <small class="text-muted">
+                                        {{ saved.job.company.name }} &bull;
+                                        {{ saved.job.location }} &bull;
+                                        <span class="text-success fw-semibold">
+                                            UGX {{ saved.job.salary|floatformat:"0" }}
+                                        </span>
+                                    </small>
+                                </div>
+                                <div class="text-end flex-shrink-0 ms-3">
+                                    <span class="badge bg-primary-subtle text-primary rounded-pill small">
+                                        {{ saved.job.job_type }}
+                                    </span>
+                                    <div class="text-muted" style="font-size:0.72rem;">
+                                        {{ saved.saved_at|date:"M d" }}
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-heart fs-3 d-block mb-2"></i>
+                        <p class="mb-2 small">No saved jobs yet.</p>
+                        <a href="{% url 'job_list' %}" class="btn btn-sm btn-outline-danger rounded-pill">
+                            Save a Job
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ── Right column ──────────────────────────────────────────── -->
+        <div class="col-lg-5">
+
+            <!-- Top Recommendations -->
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 rounded-top-4 d-flex justify-content-between align-items-center">
+                    <h2 class="h5 mb-0 fw-bold">
+                        <i class="bi bi-stars text-warning me-2"></i>Top Recommendations
+                    </h2>
+                    <a href="{% url 'recommended_jobs' %}" class="btn btn-sm btn-outline-warning rounded-pill">See All</a>
+                </div>
+                <div class="card-body p-0">
+                    {% if top_recommendations %}
+                    <ul class="list-group list-group-flush rounded-4">
+                        {% for item in top_recommendations %}
+                        <li class="list-group-item px-4 py-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <a href="{% url 'job_detail' item.job.id %}"
+                                       class="fw-semibold text-decoration-none text-dark d-block">
+                                        {{ item.job.title }}
+                                    </a>
+                                    <small class="text-muted">
+                                        {{ item.job.company.name }} &bull; {{ item.job.location }}
+                                    </small>
+                                </div>
+                                <span class="badge bg-success rounded-pill ms-2 flex-shrink-0">
+                                    {{ item.score }}%
+                                </span>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-person-lines-fill fs-3 d-block mb-2"></i>
+                        <p class="mb-2 small">Complete your profile to get recommendations.</p>
+                        <a href="{% url 'edit_profile' %}" class="btn btn-sm btn-warning rounded-pill">
+                            Update Profile
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
 {% endblock %}
-
