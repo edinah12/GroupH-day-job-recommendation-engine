@@ -9,10 +9,15 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
+import os
 
 from pathlib import Path
 
 from django.contrib.messages import constants as message_constants
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -89,8 +94,8 @@ WSGI_APPLICATION = 'job_recommendation_engine.wsgi.application'
 DB_ENGINE = os.environ.get('DB_ENGINE', '')
 DB_NAME = os.environ.get('DB_NAME', '')
 
-if DB_ENGINE == 'django.db.backends.postgresql' or DB_NAME != '':
-    DATABASES = {
+
+DATABASES = {
         'default': {
             'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.postgresql'),
             'NAME': os.environ.get('DB_NAME', 'job_recommendation_db'),
@@ -101,13 +106,7 @@ if DB_ENGINE == 'django.db.backends.postgresql' or DB_NAME != '':
             'CONN_MAX_AGE': int(os.environ.get('DB_CONN_MAX_AGE', 600)),
         }
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+
 
 
 # Password validation
