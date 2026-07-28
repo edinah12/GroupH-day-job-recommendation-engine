@@ -6,7 +6,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 from recommender.decorators import recruiter_required, seeker_required
 from recommender.forms import JobForm, JobApplicationForm, JobSearchForm
-from recommender.models import Job, Application, JobCategory
+from recommender.models import Job, Application, JobCategory, SavedJob, JobView
 from recommender.search import fuzzy_filter
 from recommender.utils import get_user_profile
 
