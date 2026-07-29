@@ -6,8 +6,46 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 from recommender.decorators import recruiter_required, seeker_required
 from recommender.forms import JobForm, JobApplicationForm, JobSearchForm
-from recommender.models import Job, Application, SavedJob, JobView, JobCategory
+from recommender.models import Job, Application, JobCategory, SavedJob, JobView
+from recommender.search import fuzzy_filter
 from recommender.utils import get_user_profile
+
+# Every sort option maps to a full order_by() tuple that always ends with a
+# stable secondary key (-id/id). Without that tie-breaker, rows that share
+# the exact same posted_at/salary/deadline value can come back in a
+# different order on every request, which makes "Oldest to Newest" /
+# "Newest to Oldest" look broken even though the primary field is correct.
+JOB_SORT_OPTIONS = {
+    "-posted_at": ("-posted_at", "-id"),   # Newest to Oldest
+    "posted_at": ("posted_at", "id"),      # Oldest to Newest
+    "-salary": ("-salary", "-posted_at", "-id"),
+    "salary": ("salary", "-posted_at", "-id"),
+    "deadline": ("deadline", "-posted_at", "-id"),
+}
+DEFAULT_JOB_SORT = "-posted_at"
+
+
+def _job_search_text(job):
+    # Deliberately excludes description/requirements: those are long,
+    # generic free-text fields, and comparing typo'd words against every
+    # word in them causes incidental collisions with unrelated boilerplate
+    # (e.g. a typo'd "developr" fuzzy-matching the word "develop" inside
+    # an unrelated "policy development" phrase). Exact substring search
+    # still covers description/requirements via `exact_fields` below -
+    # only the fuzzy/typo-tolerant pass is scoped to these more specific,
+    # job-identifying fields.
+    return " ".join(
+        filter(
+            None,
+            [
+                job.title,
+                job.company.name if job.company_id else "",
+                job.location,
+                job.required_skills,
+                job.category.name if job.category_id else "",
+            ],
+        )
+    )
 
 
 def job_list(request):
@@ -22,7 +60,7 @@ def job_list(request):
     """
     search_form = JobSearchForm(request.GET or None)
 
-    jobs = Job.objects.select_related("company", "category").order_by("-posted_at")
+    jobs = Job.objects.select_related("company", "category")
 
     # search_form.is_valid() also runs even with an empty query dict
     # (all fields are optional), so this safely handles a fresh page load.
@@ -31,12 +69,20 @@ def job_list(request):
 
         search_query = (data.get("search") or "").strip()
         if search_query:
-            jobs = jobs.filter(
-                Q(title__icontains=search_query)
-                | Q(company__name__icontains=search_query)
-                | Q(description__icontains=search_query)
-                | Q(requirements__icontains=search_query)
-                | Q(required_skills__icontains=search_query)
+            # Typo-tolerant: matches exact/substring hits AND close
+            # misspellings or related word forms (e.g. "developr" still
+            # finds "Developer" roles). See recommender/search.py.
+            jobs = fuzzy_filter(
+                jobs,
+                search_query,
+                exact_fields=[
+                    "title",
+                    "company__name",
+                    "description",
+                    "requirements",
+                    "required_skills",
+                ],
+                text_fn=_job_search_text,
             )
 
         location_query = (data.get("location") or "").strip()
@@ -63,8 +109,15 @@ def job_list(request):
         if max_salary is not None:
             jobs = jobs.filter(salary__lte=max_salary)
 
-        sort_by = data.get("sort") or "-posted_at"
-        jobs = jobs.order_by(sort_by)
+    # Sorting is resolved independently of search_form.is_valid() above, so
+    # an unrelated invalid field (e.g. a bad salary value) can never cause
+    # the chosen sort order to be silently dropped. The raw GET value is
+    # checked against a fixed whitelist of real order_by() tuples, so this
+    # is also safe from arbitrary field injection.
+    sort_key = request.GET.get("sort")
+    if sort_key not in JOB_SORT_OPTIONS:
+        sort_key = DEFAULT_JOB_SORT
+    jobs = jobs.order_by(*JOB_SORT_OPTIONS[sort_key])
 
     return render(
         request,
@@ -343,4 +396,4 @@ def seeker_applications(request):
         request,
         "jobs/my_applications.html",
         {"applications": applications},
-    )
+    )
