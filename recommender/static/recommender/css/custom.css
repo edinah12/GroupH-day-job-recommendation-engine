@@ -260,9 +260,9 @@ main {
 
 /* Left Hero Branding Panel */
 .auth-hero-panel {
-  background: linear-gradient(145deg, #1d4ed8 0%, #2563eb 50%, #1e40af 100%);
+  background: linear-gradient(145deg, #1d4ed8 0%, #2563eb 50%, #1e40af 100%) !important;
   position: relative;
-  color: #ffffff;
+  color: #ffffff !important;
   padding: 3.5rem 3rem;
   display: flex;
   flex-direction: column;
