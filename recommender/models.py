@@ -101,6 +101,21 @@ class Profile(models.Model):
             return []
         return [skill.strip() for skill in self.skills.split(",") if skill.strip()]
 
+    def qualification_documents_summary(self):
+        """
+        Small counts dict used by the applicants list to show, at a glance,
+        how many of a seeker's attached qualification documents are
+        pending / verified / rejected, without a recruiter having to open
+        the full review page first.
+        """
+        docs = self.qualification_documents.all()
+        return {
+            "total": len(docs),
+            "pending": sum(1 for d in docs if d.verification_status == QualificationDocument.VERIFICATION_PENDING),
+            "verified": sum(1 for d in docs if d.verification_status == QualificationDocument.VERIFICATION_VERIFIED),
+            "rejected": sum(1 for d in docs if d.verification_status == QualificationDocument.VERIFICATION_REJECTED),
+        }
+
     def __str__(self):
         return f"{self.user.username} ({self.get_role_display()})"
     
@@ -227,6 +242,13 @@ class Application(models.Model):
 
     cover_letter = models.TextField(blank=True)
 
+    attached_documents = models.ManyToManyField(
+        "QualificationDocument",
+        blank=True,
+        related_name="applications",
+        help_text="Qualification documents the applicant chose to submit with this specific application.",
+    )
+
     applied_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
@@ -298,3 +320,92 @@ class JobView(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user.username} viewed {self.job.title}"
+
+
+class QualificationDocument(models.Model):
+    """
+    A PDF document (degree certificate, transcript, professional
+    certification, ID, etc.) a job seeker attaches to their profile so
+    recruiters can review it for authenticity when assessing an applicant.
+
+    Stored once on the seeker's profile - not per job application - so a
+    seeker only has to upload each document a single time. For any given
+    application, the seeker then chooses which of these archived
+    documents (plus optionally any newly added ones) to submit for that
+    specific job - see Application.attached_documents.
+    """
+
+    MAX_PER_PROFILE = 10
+
+    DOCUMENT_TYPE_DEGREE = "degree"
+    DOCUMENT_TYPE_TRANSCRIPT = "transcript"
+    DOCUMENT_TYPE_CERTIFICATION = "certification"
+    DOCUMENT_TYPE_ID = "id"
+    DOCUMENT_TYPE_OTHER = "other"
+    DOCUMENT_TYPE_CHOICES = [
+        (DOCUMENT_TYPE_DEGREE, "Degree Certificate"),
+        (DOCUMENT_TYPE_TRANSCRIPT, "Academic Transcript"),
+        (DOCUMENT_TYPE_CERTIFICATION, "Professional Certification"),
+        (DOCUMENT_TYPE_ID, "National ID / Passport"),
+        (DOCUMENT_TYPE_OTHER, "Other"),
+    ]
+
+    VERIFICATION_PENDING = "pending"
+    VERIFICATION_VERIFIED = "verified"
+    VERIFICATION_REJECTED = "rejected"
+    VERIFICATION_CHOICES = [
+        (VERIFICATION_PENDING, "Pending Review"),
+        (VERIFICATION_VERIFIED, "Verified"),
+        (VERIFICATION_REJECTED, "Rejected"),
+    ]
+
+    profile = models.ForeignKey(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="qualification_documents",
+    )
+
+    document_type = models.CharField(
+        max_length=20,
+        choices=DOCUMENT_TYPE_CHOICES,
+        default=DOCUMENT_TYPE_OTHER,
+    )
+
+    title = models.CharField(
+        max_length=150,
+        blank=True,
+        help_text="Optional label, e.g. 'BSc Computer Science Degree'",
+    )
+
+    file = models.FileField(upload_to="qualification_documents/%Y/%m/")
+
+    verification_status = models.CharField(
+        max_length=20,
+        choices=VERIFICATION_CHOICES,
+        default=VERIFICATION_PENDING,
+        db_index=True,
+    )
+
+    verified_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="verified_qualification_documents",
+        help_text="Recruiter who last reviewed this document.",
+    )
+
+    verification_note = models.TextField(blank=True)
+
+    verified_at = models.DateTimeField(null=True, blank=True)
+
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-uploaded_at"]
+        indexes = [
+            models.Index(fields=["profile", "verification_status"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.profile.user.username} - {self.get_document_type_display()}"
