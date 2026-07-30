@@ -59,6 +59,7 @@
                             </a>
                             {% endif %}
                         </li>
+                        {% if not user.is_authenticated or not user.profile.is_recruiter %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% if user.is_authenticated %}{% url 'company_list' %}{% else %}{% url 'login' %}{% endif %}">
                                 Companies
@@ -69,6 +70,7 @@
                                 Recommendations
                             </a>
                         </li>
+                        {% endif %}
                         {% if user.is_authenticated and not user.profile.is_recruiter %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'seeker_applications' %}">

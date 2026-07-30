@@ -37,7 +37,9 @@
         <ul class="footer-links">
           <li><a href="{% if user.is_authenticated %}{% url 'home' %}{% else %}{% url 'login' %}{% endif %}"><i class="bi bi-chevron-right me-1 text-primary small"></i> Home</a></li>
           <li><a href="{% if user.is_authenticated %}{% url 'job_list' %}{% else %}{% url 'login' %}{% endif %}"><i class="bi bi-chevron-right me-1 text-primary small"></i> Browse Jobs</a></li>
+          {% if not user.is_authenticated or not user.profile.is_recruiter %}
           <li><a href="{% if user.is_authenticated %}{% url 'company_list' %}{% else %}{% url 'login' %}{% endif %}"><i class="bi bi-chevron-right me-1 text-primary small"></i> Companies</a></li>
+          {% endif %}
           {% if user.is_authenticated and not user.profile.is_recruiter %}
           <li><a href="{% url 'recommended_jobs' %}"><i class="bi bi-chevron-right me-1 text-primary small"></i> Recommendations</a></li>
           <li><a href="{% url 'seeker_applications' %}"><i class="bi bi-chevron-right me-1 text-primary small"></i> My Applications</a></li>

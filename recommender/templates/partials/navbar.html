@@ -30,6 +30,7 @@
             <i class="bi bi-briefcase"></i> Jobs
           </a>
         </li>
+        {% if not user.is_authenticated or not user.profile.is_recruiter %}
         <li class="nav-item">
           <a class="nav-link {% if request.resolver_match.url_name == 'company_list' %}active{% endif %}"
              href="{% if user.is_authenticated %}{% url 'company_list' %}{% else %}{% url 'login' %}{% endif %}">
@@ -42,6 +43,7 @@
             <i class="bi bi-stars"></i> Recommendations
           </a>
         </li>
+        {% endif %}
         {% if user.is_authenticated %}
         <li class="nav-item">
           <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"

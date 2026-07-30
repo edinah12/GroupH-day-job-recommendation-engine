@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
+from ..decorators import seeker_required
 from ..models import Company
 from ..search import fuzzy_filter
 
@@ -11,7 +11,7 @@ def _company_search_text(company):
     return " ".join(filter(None, [company.name, company.location]))
 
 
-@login_required
+@seeker_required
 def company_list(request):
     search_query = request.GET.get("search", "").strip()
     companies = Company.objects.annotate(active_jobs_count=Count("jobs")).order_by("name")
@@ -36,7 +36,7 @@ def company_list(request):
     )
 
 
-@login_required
+@seeker_required
 def company_detail(request, company_id):
     company = get_object_or_404(Company, id=company_id)
     jobs = company.jobs.select_related("category").order_by("-posted_at")
