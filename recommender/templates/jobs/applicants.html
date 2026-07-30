@@ -25,6 +25,7 @@
                                 <th>Applied Date</th>
                                 <th>Skills</th>
                                 <th>Resume</th>
+                                <th>Qualification Docs</th>
                                 <th>Status</th>
                                 <th class="text-end pe-4">Update Status</th>
                             </tr>
@@ -52,6 +53,15 @@
                                             </a>
                                         {% else %}
                                             <span class="text-muted small">No Resume</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if app.attached_documents.all %}
+                                            <a href="{% url 'review_qualification_documents' app.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-shield-check me-1"></i> {{ app.attached_documents.all|length }} Document{{ app.attached_documents.all|length|pluralize }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted small">None Attached</span>
                                         {% endif %}
                                     </td>
                                     <td>

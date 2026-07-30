@@ -1,5 +1,12 @@
 from django import forms
-from recommender.models import Job, Company, JobCategory, Application
+from recommender.models import Job, Company, JobCategory, Application, QualificationDocument
+from recommender.forms.profile import (
+    MultipleFileField,
+    MAX_QUALIFICATION_DOCUMENT_SIZE,
+    ALLOWED_QUALIFICATION_DOCUMENT_EXTENSIONS,
+    _validate_file_extension,
+)
+from django.core.exceptions import ValidationError
 
 
 class JobSearchForm(forms.Form):
@@ -144,12 +151,45 @@ class JobForm(forms.ModelForm):
         return job
 
 
+class QualificationDocumentChoiceField(forms.ModelMultipleChoiceField):
+    """
+    Shows each archived document's title (or type, if no title was set)
+    plus its upload date as the checkbox label, so a seeker can actually
+    tell their documents apart - the model's default __str__ includes the
+    username and would render identically for every checkbox.
+    """
+
+    def label_from_instance(self, obj):
+        name = obj.title or obj.get_document_type_display()
+        return f"{name} ({obj.get_document_type_display()}, uploaded {obj.uploaded_at:%b %d, %Y})"
+
+
 class JobApplicationForm(forms.ModelForm):
     resume = forms.FileField(
         required=False,
         label="Upload/Update Resume (Optional)",
         help_text="Supported formats: PDF, DOC, DOCX",
         widget=forms.FileInput(attrs={"class": "form-control"})
+    )
+
+    attached_documents = QualificationDocumentChoiceField(
+        required=False,
+        label="Attach Documents From Your Archive",
+        queryset=QualificationDocument.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        help_text="Choose which of your uploaded qualification documents to submit with this application.",
+    )
+
+    new_document_type = forms.ChoiceField(
+        required=False,
+        label="New Document Type",
+        choices=[("", "Select a type...")] + QualificationDocument.DOCUMENT_TYPE_CHOICES,
+    )
+
+    new_documents = MultipleFileField(
+        required=False,
+        label="Add a New Document (e.g. an award or certificate)",
+        help_text="Don't have it saved yet? Attach new PDF(s) here - they'll be added to your archive and to this application.",
     )
 
     class Meta:
@@ -164,4 +204,36 @@ class JobApplicationForm(forms.ModelForm):
                 }
             ),
         }
+
+    def __init__(self, *args, profile=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.profile = profile
+        if profile is not None:
+            self.fields["attached_documents"].queryset = profile.qualification_documents.all()
+
+    def clean_new_documents(self):
+        files = self.cleaned_data.get("new_documents") or []
+        for uploaded_file in files:
+            if uploaded_file.size > MAX_QUALIFICATION_DOCUMENT_SIZE:
+                raise ValidationError(
+                    f"'{uploaded_file.name}' is too large. Each qualification document must be 10 MB or smaller."
+                )
+            _validate_file_extension(
+                uploaded_file, ALLOWED_QUALIFICATION_DOCUMENT_EXTENSIONS, "Qualification documents"
+            )
+        return files
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_files = cleaned_data.get("new_documents") or []
+        if new_files and self.profile is not None:
+            existing_count = self.profile.qualification_documents.count()
+            if existing_count + len(new_files) > QualificationDocument.MAX_PER_PROFILE:
+                remaining = max(QualificationDocument.MAX_PER_PROFILE - existing_count, 0)
+                self.add_error(
+                    "new_documents",
+                    f"You can have at most {QualificationDocument.MAX_PER_PROFILE} qualification documents "
+                    f"in total. You have {existing_count} already, so you can add up to {remaining} more.",
+                )
+        return cleaned_data
 

@@ -1,4 +1,5 @@
 {% for field in form %}
+    {% if field.name != "qualification_documents" %}
     <div class="mb-3">
         <label class="form-label" for="{{ field.id_for_label }}">
             {{ field.label }}
@@ -14,4 +15,61 @@
             <div class="invalid-feedback d-block">{{ error }}</div>
         {% endfor %}
     </div>
+    {% endif %}
 {% endfor %}
+
+{% if form.qualification_documents %}
+<div class="mb-3" id="qualification-documents-section" data-remaining="{{ document_slots_remaining }}">
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-2">
+        <label class="form-label mb-0">Qualification Documents</label>
+        <span class="text-muted small" id="qualification-documents-remaining"></span>
+    </div>
+    <p class="form-text mt-0">Attach degree certificates, transcripts, professional certifications, or ID as PDF files.</p>
+    <div id="qualification-document-inputs"></div>
+    <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="add-qualification-document">
+        <i class="bi bi-plus-lg me-1"></i> Add New Document
+    </button>
+    {% for error in form.qualification_documents.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+    {% endfor %}
+</div>
+
+<script>
+(() => {
+    const section = document.getElementById("qualification-documents-section");
+    if (!section) return;
+
+    const inputs = document.getElementById("qualification-document-inputs");
+    const addButton = document.getElementById("add-qualification-document");
+    const remainingLabel = document.getElementById("qualification-documents-remaining");
+    let remaining = Number(section.dataset.remaining);
+
+    function updateControls() {
+        remainingLabel.textContent = `${remaining} document${remaining === 1 ? "" : "s"} available`;
+        addButton.classList.toggle("d-none", remaining <= 0);
+    }
+
+    addButton.addEventListener("click", () => {
+        if (remaining <= 0) return;
+
+        const row = document.createElement("div");
+        row.className = "d-flex gap-2 mb-2";
+        row.innerHTML = `
+            <input type="file" name="qualification_documents" accept="application/pdf,.pdf" class="form-control" required>
+            <button type="button" class="btn btn-outline-danger" aria-label="Remove document">
+                <i class="bi bi-trash"></i>
+            </button>`;
+        row.querySelector("button").addEventListener("click", () => {
+            row.remove();
+            remaining += 1;
+            updateControls();
+        });
+        inputs.appendChild(row);
+        remaining -= 1;
+        updateControls();
+    });
+
+    updateControls();
+})();
+</script>
+{% endif %}

@@ -252,6 +252,68 @@
             {% endif %}
         </div>
     </div>
+
+    <!-- Qualification Documents Archive -->
+    <div class="card card-modern p-4 mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+            <h3 class="h5 fw-bold mb-0">
+                <i class="bi bi-shield-check me-2 text-primary"></i> Qualification Documents
+            </h3>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-light text-dark border">{{ profile.qualification_documents.count }} / {{ document_max }} uploaded</span>
+                {% if profile.qualification_documents.count < document_max %}
+                <a href="{% url 'edit_profile' %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus-lg me-1"></i> Add Documents
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% if profile.qualification_documents.all %}
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead>
+                    <tr class="text-muted small text-uppercase">
+                        <th>Document</th>
+                        <th>Type</th>
+                        <th>Uploaded</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for document in profile.qualification_documents.all %}
+                    <tr>
+                        <td class="fw-semibold small">{{ document.title|default:document.get_document_type_display }}</td>
+                        <td class="small text-muted">{{ document.get_document_type_display }}</td>
+                        <td class="small text-muted">{{ document.uploaded_at|date:"M d, Y" }}</td>
+                        <td>
+                            {% if document.verification_status == 'verified' %}
+                                <span class="badge bg-success">Verified</span>
+                            {% elif document.verification_status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Pending Review</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a href="{{ document.file.url }}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-dark">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted small mb-0">
+            You haven't uploaded any qualification documents yet. Add your degree certificate, transcripts,
+            certifications, or ID from the <a href="{% url 'edit_profile' %}">edit profile</a> page - you can then
+            choose which ones to attach whenever you apply for a job.
+        </p>
+        {% endif %}
+    </div>
+
     {% endif %}
 
 </div>
