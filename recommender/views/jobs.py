@@ -48,6 +48,7 @@ def _job_search_text(job):
     )
 
 
+@login_required
 def job_list(request):
     """
     Public job listings page with Search & Filtering.
@@ -140,6 +141,7 @@ def _has_active_filters(search_form: JobSearchForm) -> bool:
     )
 
 
+@login_required
 def job_detail(request, job_id: int):
     """
     Render the job detail page.
