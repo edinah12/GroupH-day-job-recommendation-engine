@@ -40,6 +40,14 @@ class CustomLoginView(LoginView):
         return post_login_url(self.request.user)
 
     def form_valid(self, form):
+        remember_me = self.request.POST.get("remember_me")
+        if remember_me:
+            # Persistent 30-day session on this device
+            self.request.session.set_expiry(30 * 24 * 3600)
+        else:
+            # Expire session on browser close
+            self.request.session.set_expiry(0)
+
         response = super().form_valid(form)
         messages.success(self.request, f"Signed in as {self.request.user.username}.")
         return response

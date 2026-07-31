@@ -26,8 +26,6 @@ def home(request):
     if not request.user.is_authenticated:
         featured_jobs = Job.objects.select_related("company", "category").order_by("-posted_at")
         if search_query:
-            # Typo-tolerant: also catches close misspellings, not just
-            # exact substrings. See recommender/search.py.
             featured_jobs = fuzzy_filter(
                 featured_jobs,
                 search_query,

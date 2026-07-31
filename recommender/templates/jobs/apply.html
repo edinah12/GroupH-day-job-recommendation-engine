@@ -138,6 +138,51 @@
                 {% endif %}
             </div>
 
+            <!-- Qualification Documents -->
+            <div class="bg-light rounded-4 p-4 mb-4 border">
+                <h6 class="fw-bold text-dark mb-1 d-flex align-items-center">
+                    <i class="bi bi-file-earmark-text text-primary me-2 fs-5"></i> Qualification Documents
+                </h6>
+                <p class="text-muted small mb-3">
+                    Choose which documents from your archive to submit with this application so the recruiter can verify them.
+                    <span class="fw-semibold">({{ document_slots_remaining }} of {{ document_max }} slots remaining.)</span>
+                </p>
+
+                {% if form.attached_documents.field.queryset %}
+                <div class="mb-3">
+                    {% for checkbox in form.attached_documents %}
+                    <div class="form-check py-1">
+                        {{ checkbox.tag }}
+                        <label class="form-check-label small" for="{{ checkbox.id_for_label }}">
+                            {{ checkbox.choice_label }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted small mb-3">You haven't uploaded any documents to your archive yet. Add one below.</p>
+                {% endif %}
+
+                <hr class="my-3">
+
+                <p class="fw-semibold small text-dark mb-2">Need to add a new one? <span class="text-muted fw-normal">(e.g. an award or certificate)</span></p>
+                <div class="row g-2 align-items-start">
+                    <div class="col-sm-4">
+                        {{ form.new_document_type }}
+                        {% if form.new_document_type.errors %}
+                        <div class="invalid-feedback d-block">{{ form.new_document_type.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-8">
+                        {{ form.new_documents }}
+                        <div class="form-text small text-muted">{{ form.new_documents.help_text }}</div>
+                        {% if form.new_documents.errors %}
+                        <div class="invalid-feedback d-block">{{ form.new_documents.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
             <div class="d-flex align-items-center justify-content-end gap-3 pt-3 border-top">
                 <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-secondary rounded-pill px-4">
                     Cancel

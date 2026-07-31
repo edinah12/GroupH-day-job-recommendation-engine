@@ -25,11 +25,25 @@
           </a>
         </li>
         <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'job_list' %}active{% endif %}"
+             href="{% if user.is_authenticated %}{% url 'job_list' %}{% else %}{% url 'login' %}{% endif %}">
+            <i class="bi bi-briefcase"></i> Jobs
+          </a>
+        </li>
+        {% if not user.is_authenticated or not user.profile.is_recruiter %}
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'company_list' %}active{% endif %}"
+             href="{% if user.is_authenticated %}{% url 'company_list' %}{% else %}{% url 'login' %}{% endif %}">
+            <i class="bi bi-building"></i> Companies
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link {% if request.resolver_match.url_name == 'recommended_jobs' %}active{% endif %}"
-             href="{% url 'recommended_jobs' %}">
+             href="{% if user.is_authenticated %}{% url 'recommended_jobs' %}{% else %}{% url 'login' %}{% endif %}">
             <i class="bi bi-stars"></i> Recommendations
           </a>
         </li>
+        {% endif %}
         {% if user.is_authenticated %}
         <li class="nav-item">
           <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
@@ -64,12 +78,7 @@
                 </div>
               </li>
               <li>
-                <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{% url 'dashboard' %}">
-                  <i class="bi bi-grid text-accent"></i> Dashboard
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{% url 'create_profile' %}">
+                <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="{% url 'view_profile' %}">
                   <i class="bi bi-person-circle text-accent"></i> My Profile
                 </a>
               </li>

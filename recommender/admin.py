@@ -7,6 +7,7 @@ from .models import (
     Application,
     SavedJob,
     JobView,
+    QualificationDocument,
 )
 
 
@@ -54,4 +55,11 @@ class SavedJobAdmin(admin.ModelAdmin):
 class JobViewAdmin(admin.ModelAdmin):
     list_display = ("user", "job", "viewed_at")
     list_filter = ("viewed_at",)
-    search_fields = ("user__username", "job__title")
+    search_fields = ("user__username", "job__title")
+
+
+@admin.register(QualificationDocument)
+class QualificationDocumentAdmin(admin.ModelAdmin):
+    list_display = ("profile", "document_type", "title", "verification_status", "verified_by", "uploaded_at")
+    list_filter = ("document_type", "verification_status")
+    search_fields = ("profile__user__username", "title")

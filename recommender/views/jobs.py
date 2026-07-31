@@ -3,10 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
+from django.utils import timezone
 
 from recommender.decorators import recruiter_required, seeker_required
-from recommender.forms import JobForm, JobApplicationForm, JobSearchForm
-from recommender.models import Job, Application, JobCategory, SavedJob, JobView
+from recommender.forms import JobForm, JobApplicationForm, JobSearchForm, QualificationDocumentVerifyForm
+from recommender.models import Job, Application, JobCategory, SavedJob, JobView, QualificationDocument
 from recommender.search import fuzzy_filter
 from recommender.utils import get_user_profile
 
@@ -48,6 +49,7 @@ def _job_search_text(job):
     )
 
 
+@login_required
 def job_list(request):
     """
     Public job listings page with Search & Filtering.
@@ -140,6 +142,7 @@ def _has_active_filters(search_form: JobSearchForm) -> bool:
     )
 
 
+@login_required
 def job_detail(request, job_id: int):
     """
     Render the job detail page.
@@ -319,7 +322,7 @@ def apply_job(request, job_id):
         )
 
     if request.method == "POST":
-        form = JobApplicationForm(request.POST, request.FILES)
+        form = JobApplicationForm(request.POST, request.FILES, profile=profile)
         if form.is_valid():
             application = form.save(commit=False)
             application.user = request.user
@@ -330,10 +333,36 @@ def apply_job(request, job_id):
                 profile.resume = request.FILES["resume"]
                 profile.save()
 
-            messages.success(request, f"Your application for '{job.title}' has been submitted successfully!")
+            # Documents chosen from the seeker's existing archive.
+            selected_documents = list(form.cleaned_data.get("attached_documents") or [])
+
+            # Any brand-new documents (e.g. an award or certificate they
+            # didn't already have saved) are added to the archive first,
+            # then attached to this application alongside the selected ones.
+            new_files = form.cleaned_data.get("new_documents") or []
+            new_document_type = form.cleaned_data.get("new_document_type") or QualificationDocument.DOCUMENT_TYPE_OTHER
+            for uploaded_file in new_files:
+                new_document = QualificationDocument.objects.create(
+                    profile=profile,
+                    file=uploaded_file,
+                    title=uploaded_file.name,
+                    document_type=new_document_type,
+                )
+                selected_documents.append(new_document)
+
+            if selected_documents:
+                application.attached_documents.set(selected_documents)
+                messages.success(
+                    request,
+                    f"Your application for '{job.title}' has been submitted for verification by the recruiter, "
+                    f"along with {len(selected_documents)} attached document{'s' if len(selected_documents) != 1 else ''}.",
+                )
+            else:
+                messages.success(request, f"Your application for '{job.title}' has been submitted successfully!")
+
             return redirect("job_detail", job_id=job.id)
     else:
-        form = JobApplicationForm()
+        form = JobApplicationForm(profile=profile)
 
     return render(
         request,
@@ -343,6 +372,10 @@ def apply_job(request, job_id):
             "profile": profile,
             "form": form,
             "already_applied": False,
+            "document_slots_remaining": max(
+                QualificationDocument.MAX_PER_PROFILE - profile.qualification_documents.count(), 0
+            ),
+            "document_max": QualificationDocument.MAX_PER_PROFILE,
         },
     )
 
@@ -355,7 +388,11 @@ def job_applicants(request, job_id):
         messages.error(request, "You do not have permission to view applicants for this job.")
         return redirect("recruiter_dashboard")
 
-    applications = job.applications.select_related("user", "user__profile").order_by("-applied_at")
+    applications = (
+        job.applications.select_related("user", "user__profile")
+        .prefetch_related("attached_documents")
+        .order_by("-applied_at")
+    )
 
     return render(
         request,
@@ -380,6 +417,71 @@ def update_application_status(request, application_id):
             messages.success(request, f"Application status updated to '{new_status}'.")
 
     return redirect("job_applicants", job_id=application.job.id)
+
+
+@recruiter_required
+def review_qualification_documents(request, application_id):
+    """
+    Lets a recruiter open the qualification documents an applicant chose
+    to attach to this specific application (degree certificates,
+    transcripts, certifications, ID, etc.) and review each one for
+    authenticity as part of assessing that applicant.
+    """
+    application = get_object_or_404(
+        Application.objects.select_related("user", "user__profile", "job"),
+        id=application_id,
+    )
+
+    if application.job.posted_by != request.user:
+        messages.error(request, "Permission denied.")
+        return redirect("recruiter_dashboard")
+
+    documents = application.attached_documents.all()
+    verify_forms = {
+        document.id: QualificationDocumentVerifyForm(instance=document)
+        for document in documents
+    }
+
+    return render(
+        request,
+        "jobs/applicant_documents.html",
+        {
+            "application": application,
+            "documents": documents,
+            "verify_forms": verify_forms,
+        },
+    )
+
+
+@recruiter_required
+def update_document_verification(request, application_id, document_id):
+    """
+    Records a recruiter's verification decision (Pending / Verified /
+    Rejected) for one qualification document attached to a specific
+    application, after they have opened and reviewed the PDF for
+    authenticity.
+    """
+    application = get_object_or_404(Application, id=application_id)
+
+    if application.job.posted_by != request.user:
+        messages.error(request, "Permission denied.")
+        return redirect("recruiter_dashboard")
+
+    document = get_object_or_404(application.attached_documents, id=document_id)
+
+    if request.method == "POST":
+        form = QualificationDocumentVerifyForm(request.POST, instance=document)
+        if form.is_valid():
+            document = form.save(commit=False)
+            document.verified_by = request.user
+            document.verified_at = timezone.now()
+            document.save()
+            messages.success(
+                request,
+                f"'{document.title or document.get_document_type_display()}' marked as {document.get_verification_status_display()}.",
+            )
+
+    return redirect("review_qualification_documents", application_id=application.id)
 
 
 @seeker_required

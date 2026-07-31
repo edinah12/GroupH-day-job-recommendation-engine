@@ -15,6 +15,8 @@ from .views.jobs import (
     apply_job,
     job_applicants,
     update_application_status,
+    review_qualification_documents,
+    update_document_verification,
     toggle_save_job,
     saved_jobs,
     seeker_applications,
@@ -77,6 +79,12 @@ urlpatterns = [
     path("jobs/<int:job_id>/apply/", apply_job, name="apply_job"),
     path("jobs/<int:job_id>/applicants/", job_applicants, name="job_applicants"),
     path("applications/<int:application_id>/status/", update_application_status, name="update_application_status"),
+    path("applications/<int:application_id>/documents/", review_qualification_documents, name="review_qualification_documents"),
+    path(
+        "applications/<int:application_id>/documents/<int:document_id>/verify/",
+        update_document_verification,
+        name="update_document_verification",
+    ),
 
     path("profile/", view_profile, name="view_profile"),
     path("profile/edit/", edit_profile, name="edit_profile"),

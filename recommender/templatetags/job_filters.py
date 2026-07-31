@@ -33,3 +33,17 @@ def trim_filter(value: str) -> str:
         {{ skill|trim }}
     """
     return str(value).strip() if value else ""
+
+
+@register.filter(name="get_item")
+def get_item(mapping, key):
+    """
+    Look up a value in a dict by a variable key, which Django templates
+    can't do directly with the built-in `.` accessor.
+
+    Example:
+        {{ some_dict|get_item:some_key }}
+    """
+    if not mapping:
+        return None
+    return mapping.get(key)
