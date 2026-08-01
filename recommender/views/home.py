@@ -1,5 +1,7 @@
+from urllib.parse import urlencode
+
 from django.shortcuts import render, redirect
-from django.db.models import Q
+from django.urls import reverse
 from ..models import Job, Company, JobCategory
 from ..search import fuzzy_filter
 from ..utils import get_user_profile
@@ -24,16 +26,20 @@ def home(request):
     search_query = request.GET.get("search", "").strip()
 
     if not request.user.is_authenticated:
-        featured_jobs = Job.objects.select_related("company", "category").order_by("-posted_at")
+        # If an unauthenticated user performs a search, redirect them to
+        # the login page. After login, they will be sent to the full
+        # job list page with their search query preserved.
         if search_query:
-            featured_jobs = fuzzy_filter(
-                featured_jobs,
-                search_query,
-                exact_fields=["title", "company__name", "description"],
-                text_fn=_job_search_text,
-            )
+            query_params = urlencode({"search": search_query})
+            next_url = f"{reverse('job_list')}?{query_params}"
+            login_url = f"{reverse('login')}?next={next_url}"
+            return redirect(login_url)
+
+        # For a normal visit without a search, show the welcome page
+        # with a few featured (most recent) jobs.
+        featured_jobs = Job.objects.select_related("company", "category").order_by("-posted_at")
         featured_jobs = featured_jobs[:6]
-        
+
         total_jobs = Job.objects.count()
         total_companies = Company.objects.count()
         categories = JobCategory.objects.all()[:6]

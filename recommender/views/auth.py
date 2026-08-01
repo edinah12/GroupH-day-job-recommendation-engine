@@ -3,7 +3,7 @@ from django.contrib.auth import login
 from django.contrib.auth.views import LoginView
 from django.shortcuts import redirect, render
 
-from recommender.forms import StyledAuthenticationForm, UserRegistrationForm
+from recommender.forms import StyledAuthenticationForm, UserRegistrationForm, get_next_url
 from recommender.utils import post_login_url, profile_setup_redirect
 
 
@@ -37,6 +37,12 @@ class CustomLoginView(LoginView):
     redirect_authenticated_user = True
 
     def get_success_url(self):
+        # Prioritize the `next` URL parameter if it's a safe, local URL.
+        # This is crucial for redirecting users back to their intended
+        # page after login (e.g., a specific job or a search result).
+        next_url = get_next_url(self.request)
+        if next_url:
+            return next_url
         return post_login_url(self.request.user)
 
     def form_valid(self, form):

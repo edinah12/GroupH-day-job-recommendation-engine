@@ -7,6 +7,20 @@ from recommender.forms.profile import (
     _validate_file_extension,
 )
 from django.core.exceptions import ValidationError
+from django.utils.http import url_has_allowed_host_and_scheme
+
+
+def get_next_url(request, default_url="/"):
+    """
+    Safely get the 'next' URL from a request's query parameters.
+
+    Returns `default_url` if 'next' is not present or points to an
+    external/unsafe host.
+    """
+    next_url = request.GET.get("next")
+    if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        return next_url
+    return None
 
 
 class JobSearchForm(forms.Form):
