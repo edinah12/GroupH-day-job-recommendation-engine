@@ -1,3 +1,3 @@
 from .auth import StyledAuthenticationForm, UserRegistrationForm
 from .profile import ProfileForm, RecruiterProfileForm, QualificationDocumentVerifyForm
-from .jobs import JobForm, JobApplicationForm, JobSearchForm
+from .jobs import JobForm, JobApplicationForm, JobSearchForm, get_next_url
