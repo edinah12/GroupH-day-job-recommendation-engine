@@ -118,7 +118,7 @@ class JobForm(forms.ModelForm):
         widgets = {
             "title": forms.TextInput(attrs={"placeholder": "Job Title (e.g. Software Engineer)"}),
             "location": forms.TextInput(attrs={"placeholder": "Location (e.g. Remote, New York, NY)"}),
-            "salary": forms.NumberInput(attrs={"placeholder": "Salary in USD (e.g. 85000)"}),
+            "salary": forms.NumberInput(attrs={"placeholder": "Salary in UGX (e.g. 1500000)"}),
             "experience_required": forms.NumberInput(attrs={"placeholder": "Required Experience (Years)", "min": 0}),
             "deadline": forms.DateInput(attrs={"type": "date"}),
             "description": forms.Textarea(attrs={"rows": 5, "placeholder": "Detailed job description..."}),
@@ -236,4 +236,3 @@ class JobApplicationForm(forms.ModelForm):
                     f"in total. You have {existing_count} already, so you can add up to {remaining} more.",
                 )
         return cleaned_data
-

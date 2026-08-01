@@ -13,14 +13,32 @@ To support high-throughput operations (e.g., millions of active job listings, us
 erDiagram
     auth_user ||--o| recommender_profile : "has profile (1:1)"
     auth_user ||--o{ recommender_job : "posts jobs (1:N)"
-    auth_user ||--o{ recommender_application : "applies to (1:N)"
+    auth_user ||--o{ recommender_application : "submits (1:N)"
     auth_user ||--o{ recommender_savedjob : "saves (1:N)"
+    auth_user ||--o{ recommender_jobview : "views (1:N)"
+    auth_user ||--o{ recommender_qualificationdocument : "verifies (1:N)"
+
+    recommender_profile ||--o{ recommender_qualificationdocument : "owns (1:N)"
 
     recommender_company ||--o{ recommender_job : "owns (1:N)"
     recommender_jobcategory ||--o{ recommender_job : "classifies (1:N)"
 
     recommender_job ||--o{ recommender_application : "receives (1:N)"
     recommender_job ||--o{ recommender_savedjob : "bookmarked in (1:N)"
+    recommender_job ||--o{ recommender_jobview : "recorded in (1:N)"
+
+    recommender_application }|--|{ recommender_qualificationdocument : "attaches (N:M)"
+
+    auth_user {
+        bigint id PK
+        varchar username "UNIQUE"
+        varchar email
+        varchar first_name
+        varchar last_name
+        boolean is_staff
+        boolean is_active
+        timestamp date_joined
+    }
 
     recommender_profile {
         bigint id PK
@@ -63,7 +81,7 @@ erDiagram
         bigint id PK
         varchar title
         bigint company_id FK
-        bigint posted_by_id FK
+        bigint posted_by_id FK "NULLABLE"
         bigint category_id FK
         text description
         text requirements
@@ -78,8 +96,8 @@ erDiagram
 
     recommender_application {
         bigint id PK
-        bigint user_id FK
-        bigint job_id FK
+        bigint user_id FK "UNIQUE(user, job)"
+        bigint job_id FK "UNIQUE(user, job)"
         varchar status "Pending|Reviewed|Accepted|Rejected"
         text cover_letter
         timestamp applied_at
@@ -87,9 +105,29 @@ erDiagram
 
     recommender_savedjob {
         bigint id PK
-        bigint user_id FK
-        bigint job_id FK
+        bigint user_id FK "UNIQUE(user, job)"
+        bigint job_id FK "UNIQUE(user, job)"
         timestamp saved_at
+    }
+
+    recommender_jobview {
+        bigint id PK
+        bigint user_id FK "UNIQUE(user, job)"
+        bigint job_id FK "UNIQUE(user, job)"
+        timestamp viewed_at
+    }
+
+    recommender_qualificationdocument {
+        bigint id PK
+        bigint profile_id FK
+        varchar document_type "degree|transcript|certification|id|other"
+        varchar title
+        varchar file
+        varchar verification_status "pending|verified|rejected"
+        bigint verified_by_id FK "NULLABLE"
+        text verification_note
+        timestamp verified_at
+        timestamp uploaded_at
     }
 ```
 
